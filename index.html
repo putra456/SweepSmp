@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Horormu</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nosifer&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- React and Babel CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* --- General Styles & Theme --- */
+        :root {
+            --primary-color: #0a0a0a;
+            --secondary-color: #1a1a1a;
+            --accent-color: #8b0000;
+            --text-color: #e0e0e0;
+            --font-header: 'Nosifer', cursive;
+            --font-body: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: var(--font-header);
+            font-size: 5rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-color);
+            margin: 0;
+            letter-spacing: 5px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-top: 10px;
+        }
+
+        /* --- Filter --- */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--accent-color);
+            color: var(--text-color);
+            padding: 10px 25px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .filter-btn:hover {
+            background-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-color);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* --- Game Grid --- */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* --- Game Card --- */
+        .game-card {
+            background-color: var(--secondary-color);
+            border: 1px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(139, 0, 0, 0.4);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .game-card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card h3 {
+            font-family: var(--font-body);
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            margin: 0 0 10px 0;
+        }
+
+        .tension-level {
+            font-size: 0.8rem;
+            color: #ffcc00;
+            background-color: rgba(255, 204, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .tension-level.rendah { color: #4caf50; background-color: rgba(76, 175, 80, 0.1); }
+        .tension-level.sedang { color: #ff9800; background-color: rgba(255, 152, 0, 0.1); }
+        .tension-level.tinggi { color: #f44336; background-color: rgba(244, 67, 54, 0.1); }
+
+        .game-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            flex-grow: 1;
+            margin: 0;
+        }
+
+        .play-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+        }
+
+        .play-link:hover {
+            background-color: #a30000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const gameData = [
+            // RENDAH
+            { title: "Piggy", tensionLevel: "Rendah", description: "Larikan diri dari Piggy dan pecahkan teka-teki bersama. Seru buat kerja sama tim!", link: "https://www.roblox.com/games/116260263/Piggy", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=116260263&width=420&height=420&format=png" },
+            { title: "Break In", tensionLevel: "Rendah", description: "Bertahan di rumah dari serangan aneh. Lebih ke strategi dan survival.", link: "https://www.roblox.com/games/1389313825/Break-In", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=1389313825&width=420&height=420&format=png" },
+            { title: "Murder Mystery 2", tensionLevel: "Rendah", description: "Cari tahu siapa pembunuh di antara kalian, atau jadi sheriff dan lumpuhkan mereka.", link: "https://www.roblox.com/games/142823291/Murder-Mystery-2", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=142823291&width=420&height=420&format=png" },
+            { title: "Flee the Facility", tensionLevel: "Rendah", description: "Kerja sama untuk memecahkan teka-teki dan melarikan diri dari 'Beast'.", link: "https://www.roblox.com/games/893973440/Flee-the-Facility", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=893973440&width=420&height=420&format=png" },
+            { title: "Hide and Seek Extreme", tensionLevel: "Rendah", description: "Versi ekstrem dari petak umpet. Sembunyilah dengan baik atau cari mereka!", link: "https://www.roblox.com/games/20352678/Hide-and-Seek-Extreme", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=20352678&width=420&height=420&format=png" },
+            { title: "Tower of Hell", tensionLevel: "Rendah", description: "Bukan horror, tapi bisa bikin stres. Capai puncak tanpa jatuh.", link: "https://www.roblox.com/games/1962086868/Tower-of-Hell", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=1962086868&width=420&height=420&format=png" },
+            { title: "Bee Swarm Simulator", tensionLevel: "Rendah", description: "Santai mengumpulkan madu, tapi ada beberapa momen menegangkan saat melawan monster.", link: "https://www.roblox.com/games/1537690962/Bee-Swarm-Simulator", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=1537690962&width=420&height=420&format=png" },
+            { title: "Build A Boat For Treasure", tensionLevel: "Rendah", description: "Buat perahu dan berlayar melewati rintangan. Banyak momen lucu dan menegangkkan.", link: "https://www.roblox.com/games/537413528/Build-A-Boat-For-Treasure", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=537413528&width=420&height=420&format=png" },
+            { title: "Theme Park Tycoon 2", tensionLevel: "Rendah", description: "Bangun taman bermain impianmu. Tegangnya kalau duit abis.", link: "https://www.roblox.com/games/159742178/Theme-Park-Tycoon-2", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=159742178&width=420&height=420&format=png" },
+            { title: "Work at a Pizza Place", tensionLevel: "Rendah", description: "Kerja di pizzeria. Horornya kalau pelanggan marah-marah.", link: "https://www.roblox.com/games/8005/Work-at-a-Pizza-Place", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=8005&width=420&height=420&format=png" },
+            { title: "Royale High", tensionLevel: "Rendah", description: "Sekolah fantasi. Horornya saat drama sosial dimulai.", link: "https://www.roblox.com/games/735030788/Royale-High", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=735030788&width=420&height=420&format=png" },
+            { title: "Adopt Me!", tensionLevel: "Rendah", description: "Adopsi dan pelihara hewan peliharaan. Horornya saat trade gagal.", link: "https://www.roblox.com/games/920587237/Adopt-Me", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=920587237&width=420&height=420&format=png" },
+            { title: "MeepCity", tensionLevel: "Rendah", description: "Main peran, main mini-game, dan ngobrol. Horornya kalau lagi sendirian.", link: "https://www.roblox.com/games/370731277/MeepCity", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=370731277&width=420&height=420&format=png" },
+            { title: "Brookhaven", tensionLevel: "Rendah", description: "Game role-play. Horornya adalah eksistensial.", link: "https://www.roblox.com/games/4924922222/Brookhaven", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=4924922222&width=420&height=420&format=png" },
+            { title: "Zombie Attack", tensionLevel: "Rendah", description: "Bertahan dari gelombang zombie. Lebih fokus ke aksi.", link: "https://www.roblox.com/games/1240123213/Zombie-Attack", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=1240123213&width=420&height=420&format=png" },
+            { title: "Zombie Uprising", tensionLevel: "Rendah", description: "Sama seperti Zombie Attack, bertahan dari gelombang zombie.", link: "https://www.roblox.com/games/1261637863/Zombie-Uprising", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=1261637863&width=420&height=420&format=png" },
+            { title: "Jailbreak", tensionLevel: "Rendah", description: "Jadi polisi atau penjahat. Horornya kalau ketangkep polisi.", link: "https://www.roblox.com/games/606849621/Jailbreak", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=606849621&width=420&height=420&format=png" },
+
+            // SEDANG
+            { title: "DOORS", tensionLevel: "Sedang", description: "Buka 100 pintu dan hadapi monster yang mengejutkan. Banyak jump scare!", link: "https://www.roblox.com/games/6516141723/DOORS", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6516141723&width=420&height=420&format=png" },
+            { title: "Alone in a Dark House", tensionLevel: "Sedang", description: "Jadi detektif, pecahkan misteri pembunuhan di rumah tua yang gelap.", link: "https://www.roblox.com/games/2776301837/Alone-in-a-Dark-House", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=2776301837&width=420&height=420&format=png" },
+            { title: "The Mimic", tensionLevel: "Sedang", description: "Eksplorasi cerita horor Jepang yang berdasarkan legenda urban. Sangat imersif.", link: "https://www.roblox.com/games/6243699077/The-Mimic", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6243699077&width=420&height=420&format=png" },
+            { title: "Apeirophobia", tensionLevel: "Sedang", description: "Terjebak di ruang tak terbatas (backrooms). Cari jalan keluar sambil diintai entitas.", link: "https://www.roblox.com/games/9504601368/Apeirophobia", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=9504601368&width=420&height=420&format=png" },
+            { title: "Geisha", tensionLevel: "Sedang", description: "Lawan Geisha jahat di rumah tradisional Jepang. Penuh teka-teki dan ketegangan.", link: "https://www.roblox.com/games/6994844153/Geisha", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6994844153&width=420&height=420&format=png" },
+            { title: "The Rake", tensionLevel: "Sedang", description: "Bertahan dari monster 'The Rake' yang bersembunyi di kegelapan.", link: "https://www.roblox.com/games/138877502/The-Rake-Classic-Edition", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=138877502&width=420&height=420&format=png" },
+            { title: "Dead Silence", tensionLevel: "Sedang", description: "Berdasarkan film horor. Jangan biarkan Mary Shaw mendengarmu bersuara.", link: "https://www.roblox.com/games/119515960/Dead-Silence", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=119515960&width=420&height=420&format=png" },
+            { title: "It Lurks", tensionLevel: "Sedang", description: "Rasakan pengalaman horor psikologis yang mencekam dengan cerita yang dalam.", link: "https://www.roblox.com/games/3956818380/It-Lurks", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=3956818380&width=420&height=420&format=png" },
+            { title: "3008", tensionLevel: "Sedang", description: "Bertahan hidup di IKEA tak terbatas saat malam tiba dan monster keluar.", link: "https://www.roblox.com/games/2768409855/3008", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=2768409855&width=420&height=420&format=png" },
+            { title: "Identity Fraud", tensionLevel: "Sedang", description: "Seruan maze horor yang membingungkan dengan jump scare yang tak terduga.", link: "https://www.roblox.com/games/947423099/Identity-Fraud", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=947423099&width=420&height=420&format=png" },
+            { title: "The Maze", tensionLevel: "Sedang", description: "Temukan jalan keluar dari labirin bawah tanah yang gelap dan berbahaya.", link: "https://www.roblox.com/games/7977079396/The-Maze", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=7977079396&width=420&height=420&format=png" },
+            { title: "Spider", tensionLevel: "Sedang", description: "Lawan laba-laba raksasa di bunker bawah tanah. Tidak untuk arachnofobia.", link: "https://www.roblox.com/games/189707/Spider", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=189707&width=420&height=420&format=png" },
+            { title: "Nightmare Fuel", tensionLevel: "Sedang", description: "Koleksi mini-game horor singkat yang dirancang untuk menakut-nakuti.", link: "https://www.roblox.com/games/342938748/Nightmare-Fuel", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=342938748&width=420&height=420&format=png" },
+            { title: "Before the Dawn", tensionLevel: "Sedang", description: "Game survival horror di mana satu pemain menjadi monster dan lainnya harus bertahan.", link: "https://www.roblox.com/games/4975434177/Before-the-Dawn-Remastered", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=4975434177&width=420&height=420&format=png" },
+            { title: "Rainbow Friends", tensionLevel: "Sedang", description: "Selesaikan misi di area Odd World sambil menghindari monster berwarna-warni.", link: "https://www.roblox.com/games/7991339063/Rainbow-Friends", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=7991339063&width=420&height=420&format=png" },
+            { title: "Giant Survival!", tensionLevel: "Sedang", description: "Bertahan dari raksasa yang menyerang peta. Menegangkan tapi seru.", link: "https://www.roblox.com/games/371834836/Giant-Survival", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=371834836&width=420&height=420&format=png" },
+            { title: "Twisted Murderer", tensionLevel: "Sedang", description: "Mirip Murder Mystery 2, tapi dengan twist dan senjata yang lebih unik.", link: "https://www.roblox.com/games/163926849/Twisted-Murderer", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=163926849&width=420&height=420&format=png" },
+
+            // TINGGI - 20 GAME PALING HORROR
+            { title: "DOORS", tensionLevel: "Tinggi", description: "Standar emas horor Roblox. Setiap pintu adalah ancaman baru dengan jump scare yang efektif.", link: "https://www.roblox.com/games/6516141723/DOORS", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6516141723&width=420&height=420&format=png" },
+            { title: "The Mimic", tensionLevel: "Tinggi", description: "Horor Jepang yang sangat mencekam. Cerita dalam dan monster yang benar-benar menyeramkan.", link: "https://www.roblox.com/games/6243699077/The-Mimic", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6243699077&width=420&height=420&format=png" },
+            { title: "Apeirophobia", tensionLevel: "Tinggi", description: "Pengalaman Backrooms yang paling otentik. Rasa takut akan ruang tak terbatas dan entitas yang mengintai.", link: "https://www.roblox.com/games/9504601368/Apeirophobia", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=9504601368&width=420&height=420&format=png" },
+            { title: "Alone in a Dark House", tensionLevel: "Tinggi", description: "Klasik horor detektif. Suasana yang tegang dan misteri pembunuhan yang gelap.", link: "https://www.roblox.com/games/2776301837/Alone-in-a-Dark-House", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=2776301837&width=420&height=420&format=png" },
+            { title: "3008", tensionLevel: "Tinggi", description: "Kengerian bertahan di IKEA tak terbatas. Ketegangan membangun perlahan hingga malam tiba.", link: "https://www.roblox.com/games/2768409855/3008", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=2768409855&width=420&height=420&format=png" },
+            { title: "The Rake: Classic Edition", tensionLevel: "Tinggi", description: "Monster klasik yang memburu kamu di kegelapan. Pengalaman horor survival yang murni.", link: "https://www.roblox.com/games/138877502/The-Rake-Classic-Edition", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=138877502&width=420&height=420&format=png" },
+            { title: "Dead Silence", tensionLevel: "Tinggi", description: "Berdasarkan film legendaris. Bisu atau mati. Mekanik berbasis suara yang sangat menekan.", link: "https://www.roblox.com/games/119515960/Dead-Silence", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=119515960&width=420&height=420&format=png" },
+            { title: "Forewarned", tensionLevel: "Tinggi", description: "Eksplorasi makam Mesir kuno. Kerja sama tim adalah kunci untuk bertahan dari kutukan.", link: "https://www.roblox.com/games/9626504966/Forewarned", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=9626504966&width=420&height=420&format=png" },
+            { title: "Evade", tensionLevel: "Tinggi", description: "Kepanikan murni. Lari dari Nextbots yang sangat cepat di peta-peta besar. Sangat intens.", link: "https://www.roblox.com/games/9872472333/Evade", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=9872472333&width=420&height=420&format=png" },
+            { title: "Pressure", tensionLevel: "Tinggi", description: "Horor bawah air yang klaustrofobik. Bertahan dari monster dan tekanan air yang meningkat.", link: "https://www.roblox.com/games/7270418265/Pressure", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=7270418265&width=420&height=420&format=png" },
+            { title: "The True Backrooms", tensionLevel: "Tinggi", description: "Salah satu interpretasi Backrooms yang paling menakutkan dan atmosferik.", link: "https://www.roblox.com/games/12488116973/The-True-Backrooms", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=12488116973&width=420&height=420&format=png" },
+            { title: "It Lurks", tensionLevel: "Tinggi", description: "Horor psikologis yang akan mengganggu pikiran kamu. Cerita yang dalam dan mencekam.", link: "https://www.roblox.com/games/3956818380/It-Lurks", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=3956818380&width=420&height=420&format=png" },
+            { title: "Identity Fraud", tensionLevel: "Tinggi", description: "Labirin horor yang membingungkan dengan rasa terus-menerus diawasi dan diikuti.", link: "https://www.roblox.com/games/947423099/Identity-Fraud", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=947423099&width=420&height=420&format=png" },
+            { title: "Decaying Winter", tensionLevel: "Tinggi", description: "Survival horor yang brutal dan suram. Pertarungan untuk bertahan di dunia yang sudah hancur.", link: "https://www.roblox.com/games/11993982917/Decaying-Winter", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=11993982917&width=420&height=420&format=png" },
+            { title: "Nightmare Fuel", tensionLevel: "Tinggi", description: "Antologi horor singkat. Setiap level adalah pengalaman menakutkan baru yang akan membuatmu melompat.", link: "https://www.roblox.com/games/342938748/Nightmare-Fuel", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=342938748&width=420&height=420&format=png" },
+            { title: "The Haunted Imperial Hotel", tensionLevel: "Tinggi", description: "Investigasi hotel berhantu. Penuh dengan aktivitas paranormal yang tidak terduga.", link: "https://www.roblox.com/games/11579735273/The-Haunted-Imperial-Hotel", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=11579735273&width=420&height=420&format=png" },
+            { title: "The Stalker", tensionLevel: "Tinggi", description: "Diburu oleh entitas yang tidak terlihat dan cerdas. Rasa takut yang konstan dan menegangkan.", link: "https://www.roblox.com/games/6872274481/The-Stalker", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6872274481&width=420&height=420&format=png" },
+            { title: "Insane Elevator", tensionLevel: "Tinggi", description: "Klasik horor acak. Setiap lantai elevator adalah skenario menakutkan yang baru.", link: "https://www.roblox.com/games/3229968325/Insane-Elevator", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=3229968325&width=420&height=420&format=png" },
+            { title: "The Apartment", tensionLevel: "Tinggi", description: "Horor found-footage yang terasa personal dan sangat tidak nyaman. Kamu akan merasa diawasi.", link: "https://www.roblox.com/games/6909985558/The-Apartment", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=6909985558&width=420&height=420&format=png" },
+            { title: "Shadows of the Past", tensionLevel: "Tinggi", description: "Horor psikologis modern dengan cerita yang kuat dan suasana yang sangat mencekam.", link: "https://www.roblox.com/games/10832927471/Shadows-of-the-Past", imageUrl: "https://www.roblox.com/asset-thumbnail/image?assetId=10832927471&width=420&height=420&format=png" },
+        ];
+
+        function App() {
+            const [filter, setFilter] = useState('Semua');
+
+            const filteredGames = filter === 'Semua' 
+                ? gameData 
+                : gameData.filter(game => game.tensionLevel === filter);
+
+            return (
+                <div className="container">
+                    <Header />
+                    <Filter currentFilter={filter} onFilterChange={setFilter} />
+                    <GameList games={filteredGames} />
+                </div>
+            );
+        }
+
+        function Header() {
+            return (
+                <header className="header">
+                    <h1>Pilih Horormu</h1>
+                    <p>50 Pilihan Game buat Mabar Sama Fineshyt</p>
+                </header>
+            );
+        }
+
+        function Filter({ currentFilter, onFilterChange }) {
+            const filters = ['Semua', 'Rendah', 'Sedang', 'Tinggi'];
+            return (
+                <div className="filter-container">
+                    {filters.map(f => (
+                        <button 
+                            key={f}
+                            className={`filter-btn ${currentFilter === f ? 'active' : ''}`}
+                            onClick={() => onFilterChange(f)}
+                        >
+                            {f === 'Rendah' && 'Nyiir Ajah'}
+                            {f === 'Sedang' && 'Sedikit Deg-degan'}
+                            {f === 'Tinggi' && 'Paling Horror'}
+                            {f === 'Semua' && 'Semua'}
+                        </button>
+                    ))}
+                </div>
+            );
+        }
+
+        function GameList({ games }) {
+            return (
+                <div className="game-grid">
+                    {games.map((game, index) => (
+                        <GameCard key={index} game={game} />
+                    ))}
+                </div>
+            );
+        }
+
+        function GameCard({ game }) {
+            const levelClass = game.tensionLevel.toLowerCase();
+            
+            const message = `"${game.title} AJA"`;
+            const waLink = `https://wa.me/6282230304458?text=${encodeURIComponent(message)}`;
+
+            return (
+                <div className="game-card">
+                    <img src={game.imageUrl} alt={game.title} />
+                    <div className="game-card-content">
+                        <h3>{game.title}</h3>
+                        <span className={`tension-level ${levelClass}`}>{game.tensionLevel}</span>
+                        <p>{game.description}</p>
+                        <a href={waLink} target="_blank" rel="noopener noreferrer" className="play-link">
+                            Ajak Main
+                        </a>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body>
+</html>
