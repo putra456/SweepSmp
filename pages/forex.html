@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex Trading - RayzW2E Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/enterprise.css">
+    <link rel="stylesheet" href="../assets/css/charts.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+</head>
+<body class="enterprise-body">
+    <!-- Navigation -->
+    <nav class="enterprise-navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-robot"></i>
+                <span>RayzW2E</span>
+                <span class="enterprise-badge">FOREX</span>
+            </div>
+            <div class="nav-menu">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="#" class="active">Forex</a>
+                <a href="crypto.html">Crypto</a>
+                <a href="stocks.html">Stocks</a>
+                <a href="commodities.html">Commodities</a>
+            </div>
+            <div class="nav-actions">
+                <button onclick="location.href='../dashboard.html'" class="btn-premium">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Forex Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="page-title">Forex Trading Terminal</h1>
+                <div class="breadcrumb">
+                    <span>Trading</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Forex</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="market-overview">
+                    <div class="market-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span id="eurPrice">1.0850</span>
+                        <span class="change positive">+0.12%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-pound-sign"></i>
+                        <span id="gbpPrice">1.2745</span>
+                        <span class="change negative">-0.08%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-yen-sign"></i>
+                        <span id="jpyPrice">148.25</span>
+                        <span class="change positive">+0.05%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="session-info">
+                    <span class="session-label">Session:</span>
+                    <span id="currentSession" class="session-value">London</span>
+                </div>
+                <div class="spread-info">
+                    <span class="spread-label">Avg Spread:</span>
+                    <span class="spread-value">0.1 pips</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Forex Dashboard -->
+        <section class="content-section active">
+            <!-- Currency Pairs Grid -->
+            <div class="forex-pairs-grid">
+                <div class="pair-card major" data-pair="EURUSD">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">EUR/USD</span>
+                            <span class="pair-name">Euro / US Dollar</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="eurusd-price">1.0850</span>
+                        <span class="price-change positive">+0.0012</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.1 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>125.3M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>8.2%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('EURUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('EURUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pair-card major" data-pair="GBPUSD">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">GBP/USD</span>
+                            <span class="pair-name">British Pound / US Dollar</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="gbpusd-price">1.2745</span>
+                        <span class="price-change negative">-0.0010</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.2 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>89.7M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>10.5%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('GBPUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('GBPUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pair-card major" data-pair="USDJPY">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">USD/JPY</span>
+                            <span class="pair-name">US Dollar / Japanese Yen</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="usdjpy-price">148.25</span>
+                        <span class="price-change positive">+0.08</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.1 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>156.8M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>7.8%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('USDJPY', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('USDJPY', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pair-card minor" data-pair="AUDUSD">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">AUD/USD</span>
+                            <span class="pair-name">Australian Dollar / US Dollar</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="audusd-price">0.6545</span>
+                        <span class="price-change positive">+0.0023</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.3 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>45.2M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>12.3%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('AUDUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('AUDUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pair-card minor" data-pair="USDCAD">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">USD/CAD</span>
+                            <span class="pair-name">US Dollar / Canadian Dollar</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="usdcad-price">1.3650</span>
+                        <span class="price-change negative">-0.0015</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.2 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>32.1M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>9.7%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('USDCAD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('USDCAD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pair-card exotic" data-pair="EURJPY">
+                    <div class="pair-header">
+                        <div class="pair-info">
+                            <span class="pair-symbol">EUR/JPY</span>
+                            <span class="pair-name">Euro / Japanese Yen</span>
+                        </div>
+                        <div class="pair-status">
+                            <span class="status-dot active"></span>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    <div class="pair-price">
+                        <span class="current-price" id="eurjpy-price">160.85</span>
+                        <span class="price-change positive">+0.25</span>
+                    </div>
+                    <div class="pair-stats">
+                        <div class="stat">
+                            <span>Spread:</span>
+                            <span>0.5 pips</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>78.9M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span>11.2%</span>
+                        </div>
+                    </div>
+                    <div class="pair-actions">
+                        <button class="trade-btn buy" onclick="openTradeModal('EURJPY', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openTradeModal('EURJPY', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forex Chart and Analysis -->
+            <div class="dashboard-grid">
+                <div class="card main-chart">
+                    <div class="chart-header">
+                        <h3>EUR/USD Chart</h3>
+                        <div class="chart-controls">
+                            <button class="timeframe active" data-tf="1m">1M</button>
+                            <button class="timeframe" data-tf="5m">5M</button>
+                            <button class="timeframe" data-tf="15m">15M</button>
+                            <button class="timeframe" data-tf="1h">1H</button>
+                            <button class="timeframe" data-tf="4h">4H</button>
+                            <button class="timeframe" data-tf="1d">1D</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="forexChart"></canvas>
+                    </div>
+                    <div class="chart-overlays">
+                        <div class="overlay-options">
+                            <label>
+                                <input type="checkbox" id="showMA"> Moving Averages
+                            </label>
+                            <label>
+                                <input type="checkbox" id="showFibonacci"> Fibonacci
+                            </label>
+                            <label>
+                                <input type="checkbox" id="showPivot"> Pivot Points
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card forex-analysis">
+                    <div class="card-header">
+                        <h3>Technical Analysis</h3>
+                        <div class="ai-status">
+                            <span class="pulse-dot"></span>
+                            <span>AI Analyzing</span>
+                        </div>
+                    </div>
+                    
+                    <div class="technical-indicators">
+                        <div class="indicator-group">
+                            <div class="indicator">
+                                <span class="indicator-label">RSI (14)</span>
+                                <span class="indicator-value neutral">52.3</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="indicator-label">MACD</span>
+                                <span class="indicator-value bullish">Buy Signal</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="indicator-label">Stochastic</span>
+                                <span class="indicator-value bearish">Sell Signal</span>
+                            </div>
+                        </div>
+                        
+                        <div class="indicator-group">
+                            <div class="indicator">
+                                <span class="indicator-label">MA 50</span>
+                                <span class="indicator-value bullish">1.0845</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="indicator-label">MA 200</span>
+                                <span class="indicator-value bearish">1.0820</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="indicator-label">Signal</span>
+                                <span class="indicator-value bullish">Golden Cross</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="fibonacci-levels">
+                        <h4>Fibonacci Levels</h4>
+                        <div class="fib-levels">
+                            <div class="fib-level resistance">
+                                <span class="level-label">78.6%</span>
+                                <span class="level-price">1.0895</span>
+                            </div>
+                            <div class="fib-level resistance">
+                                <span class="level-label">61.8%</span>
+                                <span class="level-price">1.0872</span>
+                            </div>
+                            <div class="fib-level support">
+                                <span class="level-label">38.2%</span>
+                                <span class="level-price">1.0828</span>
+                            </div>
+                            <div class="fib-level support">
+                                <span class="level-label">23.6%</span>
+                                <span class="level-price">1.0815</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pivot-points">
+                        <h4>Pivot Points</h4>
+                        <div class="pivot-grid">
+                            <div class="pivot-row">
+                                <span>R3:</span>
+                                <span>1.0895</span>
+                            </div>
+                            <div class="pivot-row">
+                                <span>R2:</span>
+                                <span>1.0872</span>
+                            </div>
+                            <div class="pivot-row">
+                                <span>R1:</span>
+                                <span>1.0848</span>
+                            </div>
+                            <div class="pivot-row current">
+                                <span>PP:</span>
+                                <span>1.0850</span>
+                            </div>
+                            <div class="pivot-row">
+                                <span>S1:</span>
+                                <span>1.0822</span>
+                            </div>
+                            <div class="pivot-row">
+                                <span>S2:</span>
+                                <span>1.0805</span>
+                            </div>
+                            <div class="pivot-row">
+                                <span>S3:</span>
+                                <span>1.0788</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Economic Calendar -->
+            <div class="card economic-calendar">
+                <div class="card-header">
+                    <h3>Economic Calendar</h3>
+                    <div class="calendar-filters">
+                        <button class="filter active" data-impact="all">All</button>
+                        <button class="filter" data-impact="high">High</button>
+                        <button class="filter" data-impact="medium">Medium</button>
+                        <button class="filter" data-impact="low">Low</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-events">
+                    <div class="event high" data-time="08:30">
+                        <div class="event-time">08:30</div>
+                        <div class="event-content">
+                            <div class="event-title">US CPI (MoM)</div>
+                            <div class="event-details">
+                                <span class="event-actual">0.3%</span>
+                                <span class="event-forecast">0.2%</span>
+                                <span class="event-previous">0.4%</span>
+                            </div>
+                        </div>
+                        <div class="event-impact high">High Impact</div>
+                    </div>
+                    
+                    <div class="event medium" data-time="10:00">
+                        <div class="event-time">10:00</div>
+                        <div class="event-content">
+                            <div class="event-title">ECB Interest Rate Decision</div>
+                            <div class="event-details">
+                                <span class="event-actual">4.25%</span>
+                                <span class="event-forecast">4.25%</span>
+                                <span class="event-previous">4.00%</span>
+                            </div>
+                        </div>
+                        <div class="event-impact medium">Medium Impact</div>
+                    </div>
+                    
+                    <div class="event low" data-time="14:00">
+                        <div class="event-time">14:00</div>
+                        <div class="event-content">
+                            <div class="event-title">US Existing Home Sales</div>
+                            <div class="event-details">
+                                <span class="event-actual">4.10M</span>
+                                <span class="event-forecast">4.05M</span>
+                                <span class="event-previous">3.95M</span>
+                            </div>
+                        </div>
+                        <div class="event-impact low">Low Impact</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Book -->
+        <section class="order-book-section">
+            <div class="card order-book">
+                <div class="card-header">
+                    <h3>Order Book - EUR/USD</h3>
+                    <div class="order-book-stats">
+                        <span>Spread: <span id="spread">0.1</span> pips</span>
+                        <span>Volume: <span id="orderVolume">125.3M</span></span>
+                    </div>
+                </div>
+                
+                <div class="order-book-content">
+                    <div class="order-book-header">
+                        <div class="book-header-sells">
+                            <span>Price</span>
+                            <span>Amount (M)</span>
+                            <span>Total (M)</span>
+                        </div>
+                        <div class="book-header-buys">
+                            <span>Amount (M)</span>
+                            <span>Total (M)</span>
+                            <span>Price</span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-book-body">
+                        <div class="sells" id="sellOrders">
+                            <!-- Sells will be populated here -->
+                        </div>
+                        
+                        <div class="current-price">
+                            <span id="currentOrderPrice">1.0850</span>
+                        </div>
+                        
+                        <div class="buys" id="buyOrders">
+                            <!-- Buys will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market Sentiment -->
+        <section class="market-sentiment">
+            <div class="card sentiment-card">
+                <div class="card-header">
+                    <h3>Market Sentiment</h3>
+                    <div class="sentiment-time">Real-time</div>
+                </div>
+                
+                <div class="sentiment-overview">
+                    <div class="sentiment-gauge">
+                        <div class="gauge-circle">
+                            <div class="gauge-fill" style="width: 65%"></div>
+                        </div>
+                        <div class="gauge-label">Overall: <span class="sentiment-value bullish">Bullish</span></div>
+                    </div>
+                    
+                    <div class="sentiment-stats">
+                        <div class="sentiment-stat">
+                            <span class="stat-label">Buyers:</span>
+                            <span class="stat-value">65%</span>
+                        </div>
+                        <div class="sentiment-stat">
+                            <span class="stat-label">Sellers:</span>
+                            <span class="stat-value">35%</span>
+                        </div>
+                        <div class="sentiment-stat">
+                            <span class="stat-label">Neutral:</span>
+                            <span class="stat-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sentiment-breakdown">
+                    <h4>Sentiment by Timeframe</h4>
+                    <div class="sentiment-bars">
+                        <div class="sentiment-bar">
+                            <span class="timeframe-label">1M</span>
+                            <div class="bar-container">
+                                <div class="bar-fill bullish" style="width: 70%"></div>
+                                <div class="bar-fill bearish" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="sentiment-bar">
+                            <span class="timeframe-label">5M</span>
+                            <div class="bar-container">
+                                <div class="bar-fill bullish" style="width: 60%"></div>
+                                <div class="bar-fill bearish" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="sentiment-bar">
+                            <span class="timeframe-label">15M</span>
+                            <div class="bar-container">
+                                <div class="bar-fill bullish" style="width: 55%"></div>
+                                <div class="bar-fill bearish" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="sentiment-bar">
+                            <span class="timeframe-label">1H</span>
+                            <div class="bar-container">
+                                <div class="bar-fill bullish" style="width: 68%"></div>
+                                <div class="bar-fill bearish" style="width: 32%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Trade Modal -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Place Trade</h3>
+                <button class="modal-close" onclick="closeTradeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="trade-info">
+                    <div class="trade-pair">
+                        <span>Pair:</span>
+                        <span id="tradePair">EUR/USD</span>
+                    </div>
+                    <div class="trade-type">
+                        <span>Type:</span>
+                        <span id="tradeType">BUY</span>
+                    </div>
+                    <div class="trade-price">
+                        <span>Price:</span>
+                        <span id="tradePrice">1.0850</span>
+                    </div>
+                </div>
+                
+                <div class="trade-form">
+                    <div class="form-group">
+                        <label>Volume (lots)</label>
+                        <input type="number" id="tradeVolume" value="0.01" step="0.01" min="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Stop Loss (pips)</label>
+                        <input type="number" id="stopLoss" value="20" step="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Take Profit (pips)</label>
+                        <input type="number" id="takeProfit" value="40" step="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Leverage</label>
+                        <select id="leverage">
+                            <option value="1">1:1</option>
+                            <option value="10">1:10</option>
+                            <option value="25">1:25</option>
+                            <option value="50">1:50</option>
+                            <option value="100">1:100</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="trade-calculations">
+                    <div class="calc-row">
+                        <span>Required Margin:</span>
+                        <span id="requiredMargin">$108.50</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Pip Value:</span>
+                        <span>$10.00</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Risk/Reward:</span>
+                        <span id="riskReward">1:2</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeTradeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="executeTrade()">Place Trade</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/enterprise-core.js"></script>
+    <script src="../assets/js/multi-market-engine.js"></script>
+    <script src="../assets/js/advanced-ai-engine.js"></script>
+    <script src="../assets/js/real-time-feed.js"></script>
+    <script>
+        // Forex specific JavaScript
+        let forexChart = null;
+        let currentPair = 'EURUSD';
+        let currentTradeType = 'BUY';
+        
+        // Initialize forex page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeForexPage();
+            startRealTimeUpdates();
+        });
+        
+        function initializeForexPage() {
+            initializeChart();
+            setupEventListeners();
+            updateSessionInfo();
+            loadOrderBook();
+            updateSentiment();
+        }
+        
+        function initializeChart() {
+            const ctx = document.getElementById('forexChart');
+            if (!ctx) return;
+            
+            forexChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(100),
+                    datasets: [{
+                        label: 'EUR/USD',
+                        data: generateRandomPrices(100, 1.0850),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#e2e8f0',
+                            bodyColor: '#94a3b8',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                callback: function(value) {
+                                    return value.toFixed(4);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Timeframe buttons
+            document.querySelectorAll('.timeframe').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.timeframe').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    changeTimeframe(this.dataset.tf);
+                });
+            });
+            
+            // Calendar filters
+            document.querySelectorAll('.calendar-filters .filter').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.calendar-filters .filter').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterCalendarEvents(this.dataset.impact);
+                });
+            });
+            
+            // Chart overlays
+            document.querySelectorAll('.overlay-options input').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    toggleChartOverlay(this.id, this.checked);
+                });
+            });
+        }
+        
+        function changeTimeframe(timeframe) {
+            // Update chart with new timeframe data
+            const newData = generateRandomPrices(100, 1.0850);
+            forexChart.data.datasets[0].data = newData;
+            forexChart.update();
+        }
+        
+        function toggleChartOverlay(overlayId, show) {
+            // Toggle chart overlays
+            console.log(`Toggle ${overlayId}: ${show}`);
+        }
+        
+        function filterCalendarEvents(impact) {
+            const events = document.querySelectorAll('.calendar-events .event');
+            events.forEach(event => {
+                if (impact === 'all') {
+                    event.style.display = 'block';
+                } else {
+                    event.style.display = event.classList.contains(impact) ? 'block' : 'none';
+                }
+            });
+        }
+        
+        function updateSessionInfo() {
+            const now = new Date();
+            const hour = now.getUTCHours();
+            
+            let session = 'Sydney';
+            if (hour >= 13 && hour < 22) session = 'London';
+            else if (hour >= 22 || hour < 13) session = 'New York';
+            
+            document.getElementById('currentSession').textContent = session;
+        }
+        
+        function loadOrderBook() {
+            // Generate mock order book data
+            const sellOrders = generateOrderBookData('sell', 10, 1.0850);
+            const buyOrders = generateOrderBookData('buy', 10, 1.0850);
+            
+            const sellContainer = document.getElementById('sellOrders');
+            const buyContainer = document.getElementById('buyOrders');
+            
+            if (sellContainer) {
+                sellContainer.innerHTML = sellOrders.map(order => `
+                    <div class="order-row sell">
+                        <span class="price">${order.price.toFixed(4)}</span>
+                        <span class="amount">${order.amount.toFixed(2)}</span>
+                        <span class="total">${order.total.toFixed(2)}</span>
+                    </div>
+                `).join('');
+            }
+            
+            if (buyContainer) {
+                buyContainer.innerHTML = buyOrders.map(order => `
+                    <div class="order-row buy">
+                        <span class="amount">${order.amount.toFixed(2)}</span>
+                        <span class="total">${order.total.toFixed(2)}</span>
+                        <span class="price">${order.price.toFixed(4)}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Update spread
+            const bestSell = sellOrders[0];
+            const bestBuy = buyOrders[0];
+            const spread = bestSell.price - bestBuy.price;
+            
+            document.getElementById('spread').textContent = (spread * 10000).toFixed(1);
+        }
+        
+        function generateOrderBookData(type, count, basePrice) {
+            const orders = [];
+            let price = basePrice;
+            
+            for (let i = 0; i < count; i++) {
+                const amount = Math.random() * 10 + 1;
+                const priceOffset = (Math.random() * 0.001 + 0.0001) * (type === 'sell' ? 1 : -1);
+                price = basePrice + priceOffset;
+                
+                orders.push({
+                    price,
+                    amount,
+                    total: amount * price
+                });
+            }
+            
+            return orders.sort((a, b) => {
+                return type === 'sell' ? a.price - b.price : b.price - a.price;
+            });
+        }
+        
+        function updateSentiment() {
+            // Generate mock sentiment data
+            const sentimentData = {
+                overall: Math.random() > 0.5 ? 'bullish' : 'bearish',
+                buyers: Math.floor(Math.random() * 30 + 50),
+                sellers: Math.floor(Math.random() * 20 + 30),
+                neutral: Math.floor(Math.random() * 10)
+            };
+            
+            // Update sentiment gauge
+            const gaugeFill = document.querySelector('.gauge-fill');
+            if (gaugeFill) {
+                const percentage = sentimentData.overall === 'bullish' ? 
+                    sentimentData.buyers / (sentimentData.buyers + sentimentData.sellers) * 100 :
+                    sentimentData.sellers / (sentimentData.buyers + sentimentData.sellers) * 100;
+                gaugeFill.style.width = percentage + '%';
+            }
+            
+            // Update sentiment value
+            const sentimentValue = document.querySelector('.sentiment-value');
+            if (sentimentValue) {
+                sentimentValue.textContent = sentimentData.overall.charAt(0).toUpperCase() + 
+                    sentimentData.overall.slice(1);
+                sentimentValue.className = `sentiment-value ${sentimentData.overall}`;
+            }
+            
+            // Update sentiment stats
+            document.querySelector('.sentiment-stat:nth-child(1) .stat-value').textContent = 
+                sentimentData.buyers + '%';
+            document.querySelector('.sentiment-stat:nth-child(2) .stat-value').textContent = 
+                sentimentData.sellers + '%';
+            document.querySelector('.sentiment-stat:nth-child(3) .stat-value').textContent = 
+                sentimentData.neutral + '%';
+        }
+        
+        function openTradeModal(pair, type) {
+            currentPair = pair;
+            currentTradeType = type;
+            
+            document.getElementById('tradePair').textContent = pair;
+            document.getElementById('tradeType').textContent = type;
+            document.getElementById('tradePrice').textContent = getCurrentPrice(pair);
+            
+            document.getElementById('tradeModal').style.display = 'block';
+        }
+        
+        function closeTradeModal() {
+            document.getElementById('tradeModal').style.display = 'none';
+        }
+        
+        function executeTrade() {
+            const volume = parseFloat(document.getElementById('tradeVolume').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const takeProfit = parseFloat(document.getElementById('takeProfit').value);
+            const leverage = parseInt(document.getElementById('leverage').value);
+            
+            // Calculate trade details
+            const price = getCurrentPrice(currentPair);
+            const pipValue = 10; // EUR/USD pip value
+            const requiredMargin = (volume * 100000) / leverage;
+            
+            // Show confirmation
+            alert(`Trade executed: ${currentTradeType} ${volume} lots of ${currentPair} at ${price}`);
+            
+            closeTradeModal();
+        }
+        
+        function getCurrentPrice(pair) {
+            // Get current price from market data
+            const priceMap = {
+                'EURUSD': 1.0850,
+                'GBPUSD': 1.2745,
+                'USDJPY': 148.25,
+                'AUDUSD': 0.6545,
+                'USDCAD': 1.3650,
+                'EURJPY': 160.85
+            };
+            
+            return priceMap[pair] || 1.0000;
+        }
+        
+        function generateTimeLabels(count) {
+            const labels = [];
+            const now = new Date();
+            
+            for (let i = count - 1; i >= 0; i--) {
+                const time = new Date(now - i * 60000);
+                labels.push(time.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            
+            return labels;
+        }
+        
+        function generateRandomPrices(count, basePrice) {
+            const prices = [];
+            let currentPrice = basePrice;
+            
+            for (let i = 0; i < count; i++) {
+                const change = (Math.random() - 0.5) * 0.001;
+                currentPrice += change;
+                prices.push(currentPrice);
+            }
+            
+            return prices;
+        }
+        
+        function startRealTimeUpdates() {
+            // Update prices every 2 seconds
+            setInterval(() => {
+                updatePrices();
+            }, 2000);
+            
+            // Update order book every 1 second
+            setInterval(() => {
+                loadOrderBook();
+            }, 1000);
+            
+            // Update sentiment every 5 seconds
+            setInterval(() => {
+                updateSentiment();
+            }, 5000);
+            
+            // Update session every minute
+            setInterval(() => {
+                updateSessionInfo();
+            }, 60000);
+        }
+        
+        function updatePrices() {
+            // Update price displays
+            const pairs = ['eurusd', 'gbpusd', 'usdjpy', 'audusd', 'usdcad', 'eurjpy'];
+            
+            pairs.forEach(pair => {
+                const priceElement = document.getElementById(`${pair}-price`);
+                const changeElement = document.getElementById(`${pair}-change`);
+                
+                if (priceElement) {
+                    const currentPrice = parseFloat(priceElement.textContent);
+                    const change = (Math.random() - 0.5) * 0.0002;
+                    const newPrice = currentPrice + change;
+                    
+                    priceElement.textContent = newPrice.toFixed(4);
+                    
+                    if (changeElement) {
+                        const changePercent = (change / currentPrice) * 100;
+                        const sign = changePercent >= 0 ? '+' : '';
+                        changeElement.textContent = `${sign}${changePercent.toFixed(4)}%`;
+                        changeElement.className = changePercent >= 0 ? 'price-change positive' : 'price-change negative';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
