@@ -1,0 +1,48 @@
+<!-- Add this to the dashboard.html hero section -->
+<div class="connection-status connected" id="connectionStatus">
+    <span class="pulse-dot"></span>
+    <span>Connected to Binance API</span>
+</div>
+
+<!-- Update the chart container -->
+<div class="chart-container">
+    <div class="chart-header">
+        <h3>Live Chart - <span id="currentPair">BTC/USDT</span> <span class="live-indicator">LIVE</span></h3>
+        <div class="chart-controls">
+            <button class="timeframe active" data-tf="1m">1M</button>
+            <button class="timeframe" data-tf="5m">5M</button>
+            <button class="timeframe" data-tf="15m">15M</button>
+            <button class="timeframe" data-tf="1h">1H</button>
+        </div>
+    </div>
+    <canvas id="mainChart"></canvas>
+    <div class="chart-overlay">
+        <div class="last-update">
+            Last Update: <span id="lastUpdateTime">--:--:--</span>
+        </div>
+    </div>
+</div>
+
+<!-- Update AI Panel -->
+<div class="ai-panel">
+    <h3>REAL AI Analysis</h3>
+    <div id="aiStatus" class="ai-status">
+        <div class="status-indicator active"></div>
+        <span>AI Processing REAL Market Data...</span>
+    </div>
+    
+    <div id="realTechnicalIndicators" class="technical-indicators">
+        <!-- Real indicators will be populated here -->
+    </div>
+    
+    <div id="aiSignals" class="ai-signals">
+        <!-- Real AI signals will be populated here -->
+    </div>
+    
+    <div class="ai-actions">
+        <button onclick="toggleRealAutoTrading()" id="autoTradeBtn" class="btn-auto-trade">
+            <i class="fas fa-play"></i>
+            Start REAL Auto Trading
+        </button>
+    </div>
+</div>
