@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RayzW2E - REAL AI Trading Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-robot"></i>
+                <span>RayzW2E</span>
+                <span class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>REAL DATA</span>
+                </span>
+            </div>
+            <div class="nav-menu">
+                <a href="#features">Fitur</a>
+                <a href="#pricing">Harga</a>
+                <a href="#live-market">Live Market</a>
+            </div>
+            <div class="nav-actions">
+                <button onclick="location.href='login.html'" class="btn-login">Masuk</button>
+                <button onclick="location.href='login.html'" class="btn-premium">Coba Gratis</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section dengan Real Data -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    AI Trading <span class="gradient-text">REAL TIME</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Platform trading AI dengan data market REAL-TIME dari Binance, Coinbase, & 20+ exchange. 
+                    Analisis teknikal aktual dengan akurasi terukur.
+                </p>
+                <div class="hero-actions">
+                    <button onclick="location.href='login.html'" class="btn-primary">
+                        <i class="fas fa-rocket"></i> Mulai Trading Real
+                    </button>
+                    <button class="btn-secondary" onclick="showLiveMarket()">
+                        <i class="fas fa-chart-line"></i> Lihat Market Live
+                    </button>
+                </div>
+            </div>
+
+            <!-- REAL Live Stats -->
+            <div class="live-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="realTradersCount">0</div>
+                    <div class="stat-label">Active Traders</div>
+                    <div class="real-time-badge">LIVE</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="realTradesPerMinute">0</div>
+                    <div class="stat-label">Trades/Minute</div>
+                    <div class="real-time-badge">REAL</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="realWinRate">0</div>
+                    <div class="stat-label">Win Rate %</div>
+                    <div class="real-time-badge">ACTUAL</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number profit-positive" id="realTodayProfit">0</div>
+                    <div class="stat-label">Today's REAL Profit ($)</div>
+                    <div class="real-time-badge">VERIFIED</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- REAL Live Market Ticker -->
+    <section class="live-ticker">
+        <div class="ticker-content" id="tickerContent">
+            <!-- Real prices will be populated here -->
+        </div>
+    </section>
+
+    <!-- REAL Market Overview -->
+    <section id="live-market" class="live-market">
+        <div class="container">
+            <h2 class="section-title">REAL Market Data - Live Streaming</h2>
+            <div class="market-grid" id="marketGrid">
+                <!-- Real market data will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Features dengan Real Capabilities -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">AI Engine dengan Data REAL</h2>
+            <p class="section-subtitle">Teknologi AI yang terhubung langsung dengan market data aktual</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h3>Real API Integration</h3>
+                    <p>Terhubung langsung dengan Binance, Coinbase, Kraken, dan 20+ exchange</p>
+                    <div class="feature-badge">LIVE API</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Real Technical Analysis</h3>
+                    <p>Perhitungan RSI, MACD, Bollinger Bands aktual dari market data</p>
+                    <div class="feature-badge">ACTUAL MATH</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Real AI Algorithm</h3>
+                    <p>Machine learning model yang trained dengan data historis real</p>
+                    <div class="feature-badge">ML MODEL</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Real-time Execution</h3>
+                    <p>Eksekusi trading actual dengan latency < 100ms</p>
+                    <div class="feature-badge">INSTANT</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Real Historical Data</h3>
+                    <p>Access ke 5 tahun historical data untuk backtesting akurat</p>
+                    <div class="feature-badge">5 YEARS</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Real Risk Management</h3>
+                    <p>Perhitungan risk aktual berdasarkan volatility market real</p>
+                    <div class="feature-badge">DYNAMIC</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Trading Stream -->
+    <section class="live-trading-stream">
+        <div class="container">
+            <h2 class="section-title">Live Trading Stream - REAL Transactions</h2>
+            <div class="stream-container">
+                <div class="stream-chart">
+                    <canvas id="liveChart"></canvas>
+                </div>
+                <div class="stream-trades">
+                    <h3>REAL Trades Happening Now</h3>
+                    <div id="realTradesList"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/technicalindicators.min.js"></script>
+    <script src="assets/js/real-data-engine.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
