@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RayzW2E Enterprise Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/enterprise.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+</head>
+<body class="enterprise-dashboard">
+    <!-- Enterprise Sidebar -->
+    <aside class="enterprise-sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <i class="fas fa-robot"></i>
+                <span>RayzW2E</span>
+                <span class="enterprise-badge">PRO</span>
+            </div>
+            <div class="connection-status">
+                <span class="status-dot active"></span>
+                <span>All Systems Operational</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-title">Trading</div>
+                <a href="#" class="nav-item active" data-section="overview">
+                    <i class="fas fa-home"></i>
+                    <span>Overview</span>
+                    <span class="nav-badge">LIVE</span>
+                </a>
+                <a href="#" class="nav-item" data-section="multi-market">
+                    <i class="fas fa-globe"></i>
+                    <span>Multi-Market</span>
+                    <span class="nav-badge">5</span>
+                </a>
+                <a href="#" class="nav-item" data-section="ai-trading">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Trading</span>
+                    <span class="pulse-dot"></span>
+                </a>
+                <a href="#" class="nav-item" data-section="portfolio">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Portfolio</span>
+                </a>
+                <a href="#" class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Markets</div>
+                <a href="#" class="nav-item" data-market="crypto">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>Crypto</span>
+                    <span class="market-status positive">+2.4%</span>
+                </a>
+                <a href="#" class="nav-item" data-market="forex">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Forex</span>
+                    <span class="market-status negative">-0.2%</span>
+                </a>
+                <a href="#" class="nav-item" data-market="stocks">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Stocks</span>
+                    <span class="market-status positive">+1.1%</span>
+                </a>
+                <a href="#" class="nav-item" data-market="commodities">
+                    <i class="fas fa-oil-can"></i>
+                    <span>Commodities</span>
+                    <span class="market-status neutral">0.0%</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Institutional</div>
+                <a href="#" class="nav-item" data-section="risk">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Risk Management</span>
+                </a>
+                <a href="#" class="nav-item" data-section="api">
+                    <i class="fas fa-code"></i>
+                    <span>API Access</span>
+                </a>
+                <a href="#" class="nav-item" data-section="reports">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <img src="https://picsum.photos/seed/ceo/40/40" alt="User">
+                <div class="user-info">
+                    <div class="user-name">John Trader</div>
+                    <div class="user-role">Enterprise Pro</div>
+                </div>
+            </div>
+            <div class="system-metrics">
+                <div class="metric">
+                    <span>CPU:</span>
+                    <span class="metric-value">23%</span>
+                </div>
+                <div class="metric">
+                    <span>RAM:</span>
+                    <span class="metric-value">8.2GB</span>
+                </div>
+                <div class="metric">
+                    <span>Uptime:</span>
+                    <span class="metric-value">99.97%</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Dashboard -->
+    <main class="dashboard-main">
+        <!-- Top Bar -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="page-title">Enterprise Trading Dashboard</h1>
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Overview</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="market-overview">
+                    <div class="market-item">
+                        <i class="fab fa-bitcoin"></i>
+                        <span id="btcPrice">$43,250</span>
+                        <span class="change positive">+2.4%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span id="eurPrice">1.0850</span>
+                        <span class="change negative">-0.2%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="sp500">4,512</span>
+                        <span class="change positive">+1.1%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search 10,000+ instruments..." id="globalSearch">
+                </div>
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">12</span>
+                </button>
+                <div class="quick-actions">
+                    <button class="quick-action" onclick="openNewTrade()">
+                        <i class="fas fa-plus"></i>
+                        New Trade
+                    </button>
+                    <button class="quick-action" onclick="toggleAI()">
+                        <i class="fas fa-brain"></i>
+                        <span class="ai-status active">AI</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Overview Section -->
+        <section id="overview" class="content-section active">
+            <!-- Performance Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card primary">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="metric-badge">LIVE</div>
+                    </div>
+                    <div class="metric-value">$2,847,392</div>
+                    <div class="metric-label">Total Portfolio Value</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+$124,523 (4.6%)</span>
+                        <span class="time-period">Today</span>
+                    </div>
+                    <div class="metric-sparkline">
+                        <canvas id="portfolioSparkline"></canvas>
+                    </div>
+                </div>
+                
+                <div class="metric-card success">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="metric-badge">REAL</div>
+                    </div>
+                    <div class="metric-value">$48,293</div>
+                    <div class="metric-label">Today's P&L</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>94.7% Win Rate</span>
+                    </div>
+                    <div class="metric-sparkline">
+                        <canvas id="pnlSparkline"></canvas>
+                    </div>
+                </div>
+                
+                <div class="metric-card warning">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="metric-badge">ACTIVE</div>
+                    </div>
+                    <div class="metric-value">1,247</div>
+                    <div class="metric-label">Active Positions</div>
+                    <div class="metric-change neutral">
+                        <i class="fas fa-minus"></i>
+                        <span>24/7 Trading</span>
+                    </div>
+                    <div class="metric-sparkline">
+                        <canvas id="positionsSparkline"></canvas>
+                    </div>
+                </div>
+                
+                <div class="metric-card info">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="metric-badge">AI</div>
+                    </div>
+                    <div class="metric-value">87.3%</div>
+                    <div class="metric-label">AI Confidence</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Above Average</span>
+                    </div>
+                    <div class="metric-sparkline">
+                        <canvas id="aiSparkline"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Multi-Market Overview -->
+            <div class="dashboard-grid">
+                <div class="card main-chart">
+                    <div class="card-header">
+                        <h3>Multi-Market Performance</h3>
+                        <div class="chart-controls">
+                            <button class="market-tab active" data-market="all">All Markets</button>
+                            <button class="market-tab" data-market="crypto">Crypto</button>
+                            <button class="market-tab" data-market="forex">Forex</button>
+                            <button class="market-tab" data-market="stocks">Stocks</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mainMarketChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color crypto"></span>
+                            <span>Crypto (+2.4%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color forex"></span>
+                            <span>Forex (-0.2%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color stocks"></span>
+                            <span>Stocks (+1.1%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color commodities"></span>
+                            <span>Commodities (0.0%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card ai-panel">
+                    <div class="card-header">
+                        <h3>Advanced AI Analysis</h3>
+                        <div class="ai-status">
+                            <span class="pulse-dot"></span>
+                            <span>Processing</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-metrics">
+                        <div class="ai-metric">
+                            <span class="ai-label">Neural Network</span>
+                            <span class="ai-value">BUY</span>
+                            <span class="ai-confidence">94%</span>
+                        </div>
+                        <div class="ai-metric">
+                            <span class="ai-label">Quantum Optimize</span>
+                            <span class="ai-value">HOLD</span>
+                            <span class="ai-confidence">87%</span>
+                        </div>
+                        <div class="ai-metric">
+                            <span class="ai-label">Predictive Model</span>
+                            <span class="ai-value">BUY</span>
+                            <span class="ai-confidence">91%</span>
+                        </div>
+                        <div class="ai-metric">
+                            <span class="ai-label">Sentiment Score</span>
+                            <span class="ai-value">0.73</span>
+                            <span class="ai-confidence">Bullish</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-recommendation">
+                        <div class="rec-header">
+                            <span>ENSEMBLE RECOMMENDATION</span>
+                            <span class="rec-confidence">89% CONFIDENCE</span>
+                        </div>
+                        <div class="rec-action buy">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>BUY - Diversify Across Markets</span>
+                        </div>
+                        <div class="rec-details">
+                            <div class="detail-item">
+                                <span>Expected Return:</span>
+                                <span>+3.2%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Risk Level:</span>
+                                <span>Medium</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Time Horizon:</span>
+                                <span>4H-1D</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="ai-action-btn" onclick="executeAITrade()">
+                        <i class="fas fa-robot"></i>
+                        Execute AI Trade
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Live Trading Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Live Trading Activity</h3>
+                    <div class="activity-filters">
+                        <button class="filter active" data-filter="all">All</button>
+                        <button class="filter" data-filter="crypto">Crypto</button>
+                        <button class="filter" data-filter="forex">Forex</button>
+                        <button class="filter" data-filter="stocks">Stocks</button>
+                    </div>
+                </div>
+                
+                <div class="trading-table">
+                    <div class="table-header">
+                        <span>Time</span>
+                        <span>Instrument</span>
+                        <span>Type</span>
+                        <span>Size</span>
+                        <span>Entry</span>
+                        <span>Exit</span>
+                        <span>P&L</span>
+                        <span>Status</span>
+                    </div>
+                    <div class="table-body" id="liveTradesTable">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Multi-Market Section -->
+        <section id="multi-market" class="content-section">
+            <div class="section-header">
+                <h2>Multi-Market Trading Terminal</h2>
+                <div class="market-selector">
+                    <button class="market-btn active" data-market="crypto">Crypto</button>
+                    <button class="market-btn" data-market="forex">Forex</button>
+                    <button class="market-btn" data-market="stocks">Stocks</button>
+                    <button class="market-btn" data-market="commodities">Commodities</button>
+                    <button class="market-btn" data-market="bonds">Bonds</button>
+                </div>
+            </div>
+            
+            <div class="market-terminal">
+                <div class="market-watchlist">
+                    <div class="watchlist-header">
+                        <h3>Watchlist</h3>
+                        <button class="add-instrument">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="watchlist-items" id="watchlistItems">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="market-chart">
+                    <div class="chart-header">
+                        <h3 id="currentMarketInstrument">BTC/USDT</h3>
+                        <div class="chart-timeframes">
+                            <button class="timeframe active">1m</button>
+                            <button class="timeframe">5m</button>
+                            <button class="timeframe">15m</button>
+                            <button class="timeframe">1h</button>
+                            <button class="timeframe">4h</button>
+                            <button class="timeframe">1d</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="market-depth">
+                    <div class="depth-header">
+                        <h3>Order Book</h3>
+                        <span class="depth-spread">Spread: 0.01%</span>
+                    </div>
+                    <div class="order-book">
+                        <div class="book-side sells">
+                            <div class="book-header">
+                                <span>Price</span>
+                                <span>Amount</span>
+                                <span>Total</span>
+                            </div>
+                            <div class="book-rows" id="sellOrders">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="book-divider">
+                            <span id="currentPrice">43,250.00</span>
+                        </div>
+                        <div class="book-side buys">
+                            <div class="book-rows" id="buyOrders">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- AI Trading Section -->
+        <section id="ai-trading" class="content-section">
+            <div class="section-header">
+                <h2>AI Trading Control Center</h2>
+                <div class="ai-controls">
+                    <button class="ai-control-btn active" id="aiToggle">
+                        <i class="fas fa-power-off"></i>
+                        AI Active
+                    </button>
+                    <button class="ai-control-btn" onclick="openAISettings()">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </button>
+                </div>
+            </div>
+            
+            <div class="ai-dashboard">
+                <div class="ai-models">
+                    <div class="model-card">
+                        <div class="model-header">
+                            <h3>Neural Network</h3>
+                            <span class="model-status active">Running</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span>Accuracy:</span>
+                                <span>94.7%</span>
+                            </div>
+                            <div class="metric">
+                                <span>Trades:</span>
+                                <span>1,247</span>
+                            </div>
+                            <div class="metric">
+                                <span>Win Rate:</span>
+                                <span>87.3%</span>
+                            </div>
+                        </div>
+                        <div class="model-chart">
+                            <canvas id="neuralChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="model-card">
+                        <div class="model-header">
+                            <h3>Quantum Optimizer</h3>
+                            <span class="model-status active">Running</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span>Speedup:</span>
+                                <span>1000x</span>
+                            </div>
+                            <div class="metric">
+                                <span>Solutions:</span>
+                                <span>847</span>
+                            </div>
+                            <div class="metric">
+                                <span>Quality:</span>
+                                <span>95.2%</span>
+                            </div>
+                        </div>
+                        <div class="model-chart">
+                            <canvas id="quantumChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="model-card">
+                        <div class="model-header">
+                            <h3>Predictive Analytics</h3>
+                            <span class="model-status active">Running</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span>Horizon:</span>
+                                <span>72H</span>
+                            </div>
+                            <div class="metric">
+                                <span>Accuracy:</span>
+                                <span>89.1%</span>
+                            </div>
+                            <div class="metric">
+                                <span>Signals:</span>
+                                <span>156</span>
+                            </div>
+                        </div>
+                        <div class="model-chart">
+                            <canvas id="predictiveChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-strategies">
+                    <div class="strategy-card">
+                        <h3>Active AI Strategies</h3>
+                        <div class="strategy-list">
+                            <div class="strategy-item active">
+                                <div class="strategy-info">
+                                    <span class="strategy-name">Momentum Reversal</span>
+                                    <span class="strategy-performance">+12.4%</span>
+                                </div>
+                                <div class="strategy-controls">
+                                    <button class="strategy-toggle active"></button>
+                                </div>
+                            </div>
+                            <div class="strategy-item active">
+                                <div class="strategy-info">
+                                    <span class="strategy-name">Mean Reversion</span>
+                                    <span class="strategy-performance">+8.7%</span>
+                                </div>
+                                <div class="strategy-controls">
+                                    <button class="strategy-toggle active"></button>
+                                </div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-info">
+                                    <span class="strategy-name">Arbitrage Hunter</span>
+                                    <span class="strategy-performance">+3.2%</span>
+                                </div>
+                                <div class="strategy-controls">
+                                    <button class="strategy-toggle"></button>
+                                </div>
+                            </div>
+                            <div class="strategy-item active">
+                                <div class="strategy-info">
+                                    <span class="strategy-name">Sentiment Trader</span>
+                                    <span class="strategy-performance">+6.8%</span>
+                                </div>
+                                <div class="strategy-controls">
+                                    <button class="strategy-toggle active"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="assets/js/enterprise-core.js"></script>
+    <script src="assets/js/multi-market-engine.js"></script>
+    <script src="assets/js/advanced-ai-engine.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
