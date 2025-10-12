@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading - RayzW2E Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/enterprise.css">
+    <link rel="stylesheet" href="../assets/css/charts.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+</head>
+<body class="enterprise-body">
+    <!-- Navigation -->
+    <nav class="enterprise-navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-robot"></i>
+                <span>RayzW2E</span>
+                <span class="enterprise-badge">CRYPTO</span>
+            </div>
+            <div class="nav-menu">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="forex.html">Forex</a>
+                <a href="#" class="active">Crypto</a>
+                <a href="stocks.html">Stocks</a>
+                <a href="commodities.html">Commodities</a>
+            </div>
+            <div class="nav-actions">
+                <button onclick="location.href='../dashboard.html'" class="btn-premium">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Crypto Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="page-title">Cryptocurrency Trading Terminal</h1>
+                <div class="breadcrumb">
+                    <span>Trading</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Crypto</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="market-overview">
+                    <div class="market-item">
+                        <i class="fab fa-bitcoin"></i>
+                        <span id="btcPrice">43,250</span>
+                        <span class="change positive">+2.4%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fab fa-ethereum"></i>
+                        <span id="ethPrice">2,245</span>
+                        <span class="change positive">+3.2%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-coins"></i>
+                        <span id="bnbPrice">315</span>
+                        <span class="change negative">-1.1%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="market-status">
+                    <span class="status-dot active"></span>
+                    <span>24/7 Trading</span>
+                </div>
+                <div class="network-status">
+                    <span class="status-dot active"></span>
+                    <span>Network: Ethereum</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Crypto Dashboard -->
+        <section class="content-section active">
+            <!-- Market Overview -->
+            <div class="crypto-overview">
+                <div class="overview-stats">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="stat-badge">MARKET CAP</div>
+                        </div>
+                        <div class="stat-value">$2.1T</div>
+                        <div class="stat-change positive">+5.2%</div>
+                        <div class="stat-label">Total Market Cap</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-badge">24H VOLUME</div>
+                        </div>
+                        <div class="stat-value">$125.3B</div>
+                        <div class="stat-change positive">+12.5%</div>
+                        <div class="stat-label">24h Trading Volume</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="stat-badge">ACTIVE</div>
+                        </div>
+                        <div class="stat-value">2,547</div>
+                        <div class="stat-change positive">+12</div>
+                        <div class="stat-label">Active Cryptos</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-badge">DOMINANCE</div>
+                        </div>
+                        <div class="stat-value">52.3%</div>
+                        <div class="stat-change neutral">0.0%</div>
+                        <div class="stat-label">BTC Dominance</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fear & Greed Index -->
+            <div class="fear-greed-index">
+                <div class="fgi-header">
+                    <h3>Fear & Greed Index</h3>
+                    <span class="fgi-value" id="fgiValue">42</span>
+                    <span class="fgi-label" id="fgiLabel">Fear</span>
+                </div>
+                <div class="fgi-gauge">
+                    <div class="gauge-container">
+                        <div class="gauge-fill fear" style="width: 42%"></div>
+                    <div class="gauge-labels">
+                        <span class="label extreme-fear">0-20</span>
+                        <span class="label fear">20-40</span>
+                        <span class="label neutral">40-60</span>
+                        <span class="label greed">60-80</span>
+                        <span class="label extreme-greed">80-100</span>
+                    </div>
+                </div>
+                <div class="fgi-description">
+                    <span>Investors are fearful. This could indicate a buying opportunity.</span>
+                </div>
+            </div>
+
+            <!-- Top Cryptocurrencies -->
+            <div class="crypto-grid">
+                <div class="crypto-card premium" data-symbol="BTC">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">BTC</span>
+                                <span class="crypto-name">Bitcoin</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#1</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="btc-price">43,250.00</span>
+                        <span class="price-change positive">+2.4%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$845.2B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>28.5B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>19.5M</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('BTC', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('BTC', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card premium" data-symbol="ETH">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fab fa-ethereum"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">ETH</span>
+                                <span class="crypto-name">Ethereum</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#2</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="eth-price">2,245.50</span>
+                        <span class="price-change positive">+3.2%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$270.1B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>15.2B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>120.3M</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('ETH', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('ETH', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="BNB">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">BNB</span>
+                                <span class="crypto-name">Binance Coin</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#3</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="bnb-price">315.25</span>
+                        <span class="price-change negative">-1.1%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$48.5B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>1.2B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>153.9M</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('BNB', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('BNB', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="SOL">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">SOL</span>
+                                <span class="crypto-name">Solana</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#4</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="sol-price">98.75</span>
+                        <span class="price-change positive">+5.8%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$42.1B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>2.8B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>426.6M</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('SOL', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('SOL', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="ADA">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fas fa-ada"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">ADA</span>
+                                <span class="crypto-name">Cardano</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#5</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="ada-price">0.585</span>
+                        <span class="price-change positive">+2.1%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$20.5B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>580M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>35.0B</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('ADA', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('ADA', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="XRP">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fas fa-xrp"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">XRP</span>
+                                <span class="crypto-name">Ripple</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#6</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="xrp-price">0.625</span>
+                        <span class="price-change negative">-0.8%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$33.8B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>1.2B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>54.0B</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('XRP', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('XRP', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="DOT">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">DOT</span>
+                                <span class="crypto-name">Polkadot</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#7</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="dot-price">7.85</span>
+                        <span class="price-change positive">+1.5%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$8.5B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>320M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>1.1B</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('DOT', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('DOT', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crypto-card" data-symbol="DOGE">
+                    <div class="crypto-header">
+                        <div class="crypto-info">
+                            <div class="crypto-icon">
+                                <i class="fas fa-dog"></i>
+                            </div>
+                            <div class="crypto-details">
+                                <span class="crypto-symbol">DOGE</span>
+                                <span class="crypto-name">Dogecoin</span>
+                            </div>
+                        </div>
+                        <div class="crypto-rank">
+                            <span class="rank">#8</span>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <span class="current-price" id="doge-price">0.085</span>
+                        <span class="price-change positive">+8.2%</span>
+                    </div>
+                    <div class="crypto-stats">
+                        <div class="stat">
+                            <span>Cap:</span>
+                            <span>$12.1B</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span>850M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Supply:</span>
+                            <span>142.0B</span>
+                        </div>
+                    </div>
+                    <div class="crypto-actions">
+                        <button class="trade-btn buy" onclick="openCryptoTrade('DOGE', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="openCryptoTrade('DOGE', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DeFi Section -->
+            <div class="defi-section">
+                <div class="section-header">
+                    <h2>DeFi Protocols</h2>
+                    <div class="defi-stats">
+                        <div class="defi-stat">
+                            <span class="stat-label">TVL</span>
+                            <span class="stat-value">$85.2B</span>
+                            <span class="stat-change positive">+5.2%</span>
+                        </div>
+                        <div class="defi-stat">
+                            <span class="stat-label">Total Value Locked</span>
+                            <span class="stat-value">$85.2B</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="defi-protocols">
+                    <div class="defi-card">
+                        <div class="defi-header">
+                            <div class="defi-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="defi-info">
+                                <h4>Uniswap</h4>
+                                <span class="defi-chain">Ethereum</span>
+                            </div>
+                        </div>
+                        <div class="defi-stats">
+                            <div class="stat">
+                                <span>TVL:</span>
+                                <span>$15.2B</span>
+                            </div>
+                            <div class="stat">
+                                <span>24h:</span>
+                                <span>+8.5%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="defi-card">
+                        <div class="defi-header">
+                            <div class="defi-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="defi-info">
+                                <h4>Aave</h4>
+                                <span class="defi-chain">Ethereum</span>
+                            </div>
+                        </div>
+                        <div class="defi-stats">
+                            <div class="stat">
+                                <span>TVL:</span>
+                                <span>$12.8B</span>
+                            </div>
+                            <div class="stat">
+                                <span>24h:</span>
+                                <span>+3.2%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="defi-card">
+                        <div class="defi-header">
+                            <div class="defi-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="defi-info">
+                                <h4>Curve</h4>
+                                <span class="defi-chain">Ethereum</span>
+                            </div>
+                        </div>
+                        <div class="defi-stats">
+                            <div class="stat">
+                                <span>TVL:</span>
+                                <span>$8.5B</span>
+                            </div>
+                            <div class="stat">
+                                <span>24h:</span>
+                                <span>+1.8%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="defi-card">
+                        <div class="defi-header">
+                            <div class="defi-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <div class="defi-info">
+                                <h4>Chainlink</h4>
+                                <span class="defi-chain">Ethereum</span>
+                            </div>
+                        </div>
+                        <div class="defi-stats">
+                            <div class="stat">
+                                <span>TVL:</span>
+                                <span>$6.2B</span>
+                            </div>
+                            <div class="stat">
+                                <span>24h:</span>
+                                <span>+2.1%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NFT Section -->
+        <section class="nft-section">
+            <div class="section-header">
+                <h2>NFT Marketplace</h2>
+                <div class="nft-stats">
+                    <div class="nft-stat">
+                        <span class="stat-label">24h Volume</span>
+                        <span class="stat-value">$125.3M</span>
+                        <span class="stat-change positive">+15.2%</span>
+                    </div>
+                    <div class="nft-stat">
+                        <span class="stat-label">Floor Price</span>
+                        <span class="stat-value">2.5 ETH</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nft-grid">
+                <div class="nft-card">
+                    <div class="nft-image">
+                        <img src="https://picsum.photos/seed/nft1/300/300" alt="NFT">
+                    </div>
+                    <div class="nft-info">
+                        <h4>Bored Ape Yacht Club</h4>
+                        <div class="nft-price">
+                            <span class="price">2.5 ETH</span>
+                            <span class="change positive">+0.5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nft-card">
+                    <div class="nft-image">
+                        <img src="https://picsum.photos/seed/nft2/300/300" alt="NFT">
+                    </div>
+                    <div class="nft-info">
+                        <h4>CryptoPunks</h4>
+                        <div class="nft-price">
+                            <span class="price">18.5 ETH</span>
+                            <span class="change positive">+2.1</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nft-card">
+                    <div class="nft-image">
+                        <img src="https://picsum.photos/seed/nft3/300/300" alt="NFT">
+                    </div>
+                    <div class="nft-info">
+                        <h4>Art Blocks</h4>
+                        <div class="nft-price">
+                            <span class="price">1.2 ETH</span>
+                            <span class="change negative">-0.3</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nft-card">
+                    <div class="nft-image">
+                        <img src="https://picsum.photos/seed/nft4/300/300" alt="NFT">
+                    </div>
+                    <div class="nft-info">
+                        <h4>Mutant Ape Yacht Club</h4>
+                        <div class="nft-price">
+                            <span class="price">1.8 ETH</span>
+                            <span class="change positive">+0.8</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mining Section -->
+        <section class="mining-section">
+            <div class="section-header">
+                <h2>Mining Profitability</h2>
+                <div class="mining-stats">
+                    <div class="mining-stat">
+                        <span class="stat-label">Network Hashrate</span>
+                        <span class="stat-value">425.2 EH/s</span>
+                    </div>
+                    <div class="mining-stat">
+                        <span class="stat-label">Difficulty</span>
+                        <span class="stat-value">25.4T</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mining-calculator">
+                <div class="calculator-header">
+                    <h3>Mining Calculator</h3>
+                </div>
+                
+                <div class="calculator-form">
+                    <div class="form-group">
+                        <label>Hashrate (MH/s)</label>
+                        <input type="number" id="hashrate" value="100" step="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Power Consumption (W)</label>
+                        <input type="number" id="power" value="350" step="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Electricity Cost ($/kWh)</label>
+                        <input type="number" id="electricity" value="0.10" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Pool Fee (%)</label>
+                        <input type="number" id="poolFee" value="1" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Block Reward</label>
+                        <select id="blockReward">
+                            <option value="6.25">6.25 BTC</option>
+                            <option value="2">2 ETH</option>
+                            <option value="1">1 BNB</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mining-results">
+                    <div class="result-row">
+                        <span>Daily Revenue:</span>
+                        <span id="dailyRevenue">$45.20</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Daily Cost:</span>
+                        <span id="dailyCost">$8.40</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Daily Profit:</span>
+                        <span id="dailyProfit" class="positive">$36.80</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Monthly Profit:</span>
+                        <span id="monthlyProfit" class="positive">$1,104</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Trade Modal -->
+    <div id="cryptoTradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Place Crypto Trade</h3>
+                <button class="modal-close" onclick="closeCryptoTradeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="trade-info">
+                    <div class="trade-pair">
+                        <span>Pair:</span>
+                        <span id="cryptoTradePair">BTC/USDT</span>
+                    </div>
+                    <div class="trade-type">
+                        <span>Type:</span>
+                        <span id="cryptoTradeType">BUY</span>
+                    </div>
+                    <div class="trade-price">
+                        <span>Price:</span>
+                        <span id="cryptoTradePrice">43,250</span>
+                    </div>
+                </div>
+                
+                <div class="trade-form">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="cryptoAmount" value="0.01" step="0.001" min="0.001">
+                        <select id="cryptoUnit">
+                            <option value="BTC">BTC</option>
+                            <option value="ETH">ETH</option>
+                            <option value="USDT">USDT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Order Type</label>
+                        <select id="orderType">
+                            <option value="market">Market</option>
+                            <option value="limit">Limit</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="limitPriceGroup" style="display: none;">
+                        <label>Limit Price</label>
+                        <input type="number" id="limitPrice" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Stop Loss (%)</label>
+                        <input type="number" id="cryptoStopLoss" value="2" step="0.1" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Take Profit (%)</label>
+                        <input type="number" id="cryptoTakeProfit" value="4" step="0.1" min="0">
+                    </div>
+                </div>
+                
+                <div class="trade-calculations">
+                    <div class="calc-row">
+                        <span>Estimated Cost:</span>
+                        <span id="cryptoEstimatedCost">$432.50</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Network Fee:</span>
+                        <span id="cryptoNetworkFee">$0.43</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Total Cost:</span>
+                        <span id="cryptoTotalCost">$432.93</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeCryptoTradeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="executeCryptoTrade()">Place Trade</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/enterprise-core.js"></script>
+    <script src="../assets/js/multi-market-engine.js"></script>
+    <script src="../assets/js/advanced-ai-engine.js"></script>
+    <script src="../assets/js/real-time-feed.js"></script>
+    <script>
+        // Crypto specific JavaScript
+        let cryptoChart = null;
+        let currentCrypto = 'BTC';
+        let currentTradeType = 'BUY';
+        
+        // Initialize crypto page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCryptoPage();
+            startRealTimeUpdates();
+        });
+        
+        function initializeCryptoPage() {
+            initializeChart();
+            setupEventListeners();
+            updateFearGreedIndex();
+            loadDeFiData();
+            loadNFTData();
+            initializeMiningCalculator();
+        }
+        
+        function initializeChart() {
+            const ctx = document.getElementById('cryptoChart');
+            if (!ctx) return;
+            
+            cryptoChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(100),
+                    datasets: [{
+                        label: 'BTC/USDT',
+                        data: generateRandomPrices(100, 43250),
+                        borderColor: '#f7931a',
+                        backgroundColor: 'rgba(247, 147, 31, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#e2e8f0',
+                            bodyColor: '#94a3b8',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: $${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Crypto card clicks
+            document.querySelectorAll('.crypto-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const symbol = this.dataset.symbol;
+                    selectCrypto(symbol);
+                });
+            });
+            
+            // Order type change
+            document.getElementById('orderType').addEventListener('change', function() {
+                const limitPriceGroup = document.getElementById('limitPriceGroup');
+                if (this.value === 'limit') {
+                    limitPriceGroup.style.display = 'block';
+                } else {
+                    limitPriceGroup.style.display = 'none';
+                }
+            });
+            
+            // Mining calculator
+            document.querySelectorAll('.calculator-form input, .calculator-form select').forEach(input => {
+                input.addEventListener('input', calculateMiningProfit);
+            });
+        }
+        
+        function selectCrypto(symbol) {
+            currentCrypto = symbol;
+            
+            // Update UI
+            document.querySelectorAll('.crypto-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            const selectedCard = document.querySelector(`[data-symbol="${symbol}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+            
+            // Update chart
+            updateChart(symbol);
+        }
+        
+        function updateChart(symbol) {
+            if (!cryptoChart) return;
+            
+            const newData = generateRandomPrices(100, getCryptoPrice(symbol));
+            cryptoChart.data.datasets[0].data = newData;
+            cryptoChart.data.datasets[0].label = `${symbol}/USDT`;
+            cryptoChart.update();
+        }
+        
+        function updateFearGreedIndex() {
+            // Simulate FGI updates
+            setInterval(() => {
+                const fgiValue = Math.floor(Math.random() * 100);
+                const fgiElement = document.getElementById('fgiValue');
+                const fgiLabel = document.getElementById('fgiLabel');
+                const fgiGauge = document.querySelector('.gauge-fill');
+                
+                if (fgiElement) fgiElement.textContent = fgiValue;
+                if (fgiLabel) {
+                    if (fgiValue < 20) {
+                        fgiLabel.textContent = 'Extreme Fear';
+                        fgiLabel.className = 'fgi-label extreme-fear';
+                    } else if (fgiValue < 40) {
+                        fgiLabel.textContent = 'Fear';
+                        fgiLabel.className = 'fgi-label fear';
+                    } else if (fgiValue < 60) {
+                        fgiLabel.textContent = 'Neutral';
+                        fgiLabel.className = 'fgi-label neutral';
+                    } else if (fgiValue < 80) {
+                        fgiLabel.textContent = 'Greed';
+                        fgiLabel.className = 'fgi-label greed';
+                    } else {
+                        fgiLabel.textContent = 'Extreme Greed';
+                        fgiLabel.className = 'fgi-label extreme-greed';
+                    }
+                }
+                
+                if (fgiGauge) {
+                    fgiGauge.style.width = fgiValue + '%';
+                    if (fgiValue < 40) {
+                        fgiGauge.className = 'gauge-fill fear';
+                    } else if (fgiValue > 60) {
+                        fgiGauge.className = 'gauge-fill greed';
+                    } else {
+                        fgiGauge.className = 'gauge-fill neutral';
+                    }
+                }
+                
+                // Update description
+                const description = document.querySelector('.fgi-description');
+                if (description) {
+                    if (fgiValue < 40) {
+                        description.textContent = 'Investors are fearful. This could indicate a buying opportunity.';
+                    } else if (fgiValue > 60) {
+                        description.textContent = 'Investors are greedy. This could indicate a market correction.';
+                    } else {
+                        description.textContent = 'Market sentiment is neutral. Wait for clear signals.';
+                    }
+                }
+            }, 5000);
+        }
+        
+        function loadDeFiData() {
+            // Simulate DeFi data
+            const protocols = [
+                { name: 'Uniswap', tvl: 15200000000, change: 5.2, chain: 'Ethereum' },
+                { name: 'Aave', tvl: 12800000000, change: 3.2, chain: 'Ethereum' },
+                { name: 'Curve', tvl: 8500000000, change: 1.8, chain: 'Ethereum' },
+                { name: 'Chainlink', tvl: 6200000000, change: 2.1, chain: 'Ethereum' }
+            ];
+            
+            const defiCards = document.querySelectorAll('.defi-card');
+            defiCards.forEach((card, index) => {
+                if (protocols[index]) {
+                    const protocol = protocols[index];
+                    const tvlElement = card.querySelector('.defi-stats .stat:first-child .stat-value');
+                    const changeElement = card.querySelector('.defi-stats .stat:nth-child(2) .stat-change');
+                    
+                    if (tvlElement) tvlElement.textContent = formatCurrency(protocol.tvl);
+                    if (changeElement) {
+                        changeElement.textContent = '+' + protocol.change + '%';
+                        changeElement.className = 'stat-change positive';
+                    }
+                }
+            });
+        }
+        
+        function loadNFTData() {
+            // Simulate NFT data
+            const nfts = [
+                { name: 'Bored Ape Yacht Club', price: 2.5, change: 0.5 },
+                { name: 'CryptoPunks', price: 18.5, change: 2.1 },
+                { name: 'Art Blocks', price: 1.2, change: -0.3 },
+                { name: 'Mutant Ape Yacht Club', price: 1.8, change: 0.8 }
+            ];
+            
+            const nftCards = document.querySelectorAll('.nft-card');
+            nftCards.forEach((card, index) => {
+                if (nfts[index]) {
+                    const nft = nfts[index];
+                    const priceElement = card.querySelector('.nft-price .price');
+                    const changeElement = card.querySelector('.nft-price .change');
+                    
+                    if (priceElement) priceElement.textContent = nft.price + ' ETH';
+                    if (changeElement) {
+                        const sign = nft.change >= 0 ? '+' : '';
+                        changeElement.textContent = sign + nft.change;
+                        changeElement.className = 'change ' + (nft.change >= 0 ? 'positive' : 'negative');
+                    }
+                }
+            });
+        }
+        
+        function initializeMiningCalculator() {
+            const inputs = ['hashrate', 'power', 'electricity', 'poolFee'];
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', calculateMiningProfit);
+                }
+            });
+        }
+        
+        function calculateMiningProfit() {
+            const hashrate = parseFloat(document.getElementById('hashrate').value) || 100;
+            const power = parseFloat(document.getElementById('power').value) || 350;
+            const electricity = parseFloat(document.getElementById('electricity').value) || 0.10;
+            const poolFee = parseFloat(document.getElementById('poolFee').value) || 1;
+            const blockReward = parseFloat(document.querySelector('#blockRate').textContent) || 6.25;
+            
+            // Calculate daily revenue
+            const blocksPerDay = 14400 / 600; // 10 minutes per block
+            const dailyRevenue = blocksPerDay * blockReward;
+            
+            // Calculate daily cost
+            const dailyPowerCost = (power * 24) / 1000 * electricity;
+            const dailyRevenueCrypto = dailyRevenue * getCryptoPrice('BTC');
+            const dailyCost = dailyPowerCost + (dailyRevenueCrypto * poolFee / 100);
+            
+            // Calculate profits
+            const dailyProfit = dailyRevenueCrypto - dailyCost;
+            const monthlyProfit = dailyProfit * 30;
+            
+            // Update UI
+            document.getElementById('dailyRevenue').textContent = formatCurrency(dailyRevenueCrypto);
+            document.getElementById('dailyCost').textContent = formatCurrency(dailyCost);
+            document.getElementById('dailyProfit').textContent = formatCurrency(dailyProfit);
+            document.getElementById('monthlyProfit').textContent = formatCurrency(monthlyProfit);
+            document.getElementById('dailyProfit').className = 'result-row span:last-child ' + (dailyProfit >= 0 ? 'positive' : 'negative');
+        }
+        
+        function openCryptoTrade(symbol, type) {
+            currentCrypto = symbol;
+            currentTradeType = type;
+            
+            document.getElementById('cryptoTradePair').textContent = symbol + '/USDT';
+            document.getElementById('cryptoTradeType').textContent = type;
+            document.getElementById('cryptoTradePrice').textContent = getCryptoPrice(symbol);
+            
+            document.getElementById('cryptoTradeModal').style.display = 'block';
+        }
+        
+        function closeCryptoTradeModal() {
+            document.getElementById('cryptoTradeModal').style.display = 'none';
+        }
+        
+        function executeCryptoTrade() {
+            const amount = parseFloat(document.getElementById('cryptoAmount').value);
+            const orderType = document.getElementById('orderType').value;
+            const unit = document.getElementById('cryptoUnit').value;
+            const stopLoss = parseFloat(document.getElementById('cryptoStopLoss').value);
+            const takeProfit = parseFloat(document.getElementById('cryptoTakeProfit').value);
+            
+            // Calculate estimated cost
+            const price = getCryptoPrice(currentCrypto);
+            const estimatedCost = amount * price;
+            const networkFee = estimatedCost * 0.001; // 0.1% network fee
+            const totalCost = estimatedCost + networkFee;
+            
+            // Show confirmation
+            alert(`Trade executed: ${orderType} ${amount} ${unit} of ${currentCrypto} at ${price}`);
+            
+            closeCryptoTradeModal();
+        }
+        
+        function getCryptoPrice(symbol) {
+            const prices = {
+                'BTC': 43250,
+                'ETH': 2245,
+                'BNB': 315,
+                'SOL': 98.75,
+                'ADA': 0.585,
+                'XRP': 0.625,
+                'DOT': 7.85,
+                'DOGE': 0.085
+            };
+            
+            return prices[symbol] || 1.0;
+        }
+        
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(value);
+        }
+        
+        function generateTimeLabels(count) {
+            const labels = [];
+            const now = new Date();
+            
+            for (let i = count - 1; i >= 0; i--) {
+                const time = new Date(now - i * 60000);
+                labels.push(time.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            
+            return labels;
+        }
+        
+        function generateRandomPrices(count, basePrice) {
+            const prices = [];
+            let currentPrice = basePrice;
+            
+            for (let i = 0; i < count; i++) {
+                const change = (Math.random() - 0.5) * basePrice * 0.02;
+                currentPrice += change;
+                prices.push(currentPrice);
+            }
+            
+            return prices;
+        }
+        
+        function startRealTimeUpdates() {
+            // Update crypto prices every 2 seconds
+            setInterval(() => {
+                updateCryptoPrices();
+            }, 2000);
+            
+            // Update FGI every 5 seconds
+            setInterval(() => {
+                updateFearGreedIndex();
+            }, 5000);
+            
+            // Update DeFi data every 10 seconds
+            setInterval(() => {
+                loadDeFiData();
+            }, 10000);
+            
+            // Update NFT data every 30 seconds
+            setInterval(() => {
+                loadNFTData();
+            }, 30000);
+        }
+        
+        function updateCryptoPrices() {
+            const cryptos = ['btc', 'eth', 'bnb', 'sol', 'ada', 'xrp', 'dot', 'doge'];
+            
+            cryptos.forEach(crypto => {
+                const priceElement = document.getElementById(`${crypto}-price`);
+                const changeElement = document.getElementById(`${crypto}-change`);
+                
+                if (priceElement) {
+                    const currentPrice = parseFloat(priceElement.textContent);
+                    const change = (Math.random() - 0.5) * currentPrice * 0.02;
+                    const newPrice = currentPrice + change;
+                    
+                    priceElement.textContent = newPrice.toFixed(2);
+                    
+                    if (changeElement) {
+                        const changePercent = (change / currentPrice) * 100;
+                        const sign = changePercent >= 0 ? '+' : '';
+                        changeElement.textContent = `${sign}${changePercent.toFixed(2)}%`;
+                        changeElement.className = 'price-change ' + (changePercent >= 0 ? 'positive' : 'negative');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
