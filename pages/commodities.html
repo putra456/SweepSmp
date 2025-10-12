@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commodities Trading - RayzW2E Enterprise</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/commodities.css">
+    <link rel="stylesheet" href="../assets/css/enterprise.css">
+    <link rel="stylesheet" href="../assets/css/charts.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+</head>
+<body class="enterprise-body">
+    <!-- Navigation -->
+    <nav class="enterprise-navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-robot"></i>
+                <span>RayzW2E</span>
+                <span class="enterprise-badge">COMMODITIES</span>
+            </div>
+            <div class="nav-menu">
+                <a href="../dashboard.html">Dashboard</a>
+                <a href="forex.html">Forex</a>
+                <a href="crypto.html">Crypto</a>
+                <a href="stocks.html">Stocks</a>
+                <a href="#" class="active">Commodities</a>
+            </div>
+            <div class="nav-actions">
+                <button onclick="location.href='../dashboard.html'" class="btn-premium">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </button>
+            </div>
+        </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Commodities Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="page-title">Commodities Trading Terminal</h1>
+                <div class="breadcrumb">
+                    <span>Trading</span>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Commodities</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="market-overview">
+                    <div class="market-item">
+                        <i class="fas fa-coins"></i>
+                        <span id="goldPrice">2,045.50</span>
+                        <span class="change positive">+0.8%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-oil-can"></i>
+                        <span id="oilPrice">78.25</span>
+                        <span class="change negative">-1.2%</span>
+                    </div>
+                    <div class="market-item">
+                        <i class="fas fa-bolt"></i>
+                        <span id="gasPrice">3.25</span>
+                        <span class="change positive">+0.5%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="market-status">
+                    <span class="status-dot active"></span>
+                    <span>Market Open</span>
+                </div>
+                <div class="commodity-stats">
+                    <span class="stat-label">Volatility:</span>
+                    <span id="commodityVolatility">15.2%</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Commodities Dashboard -->
+        <section class="content-section active">
+            <!-- Commodities Overview -->
+            <div class="commodities-grid">
+                <div class="commodity-card precious-metals" data-commodity="XAUUSD">
+                    <div class="commodity-header">
+                        <div class="commodity-info">
+                            <div class="commodity-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="commodity-details">
+                                <span class="commodity-symbol">XAU/USD</span>
+                                <span class="commodity-name">Gold Spot</span>
+                            </div>
+                        </div>
+                        <div class="commodity-status">
+                            <span class="status-dot active"></span>
+                            <span>24/7 Trading</span>
+                        </div>
+                    </div>
+                    <div class="commodity-price">
+                        <span class="current-price" id="xauusd-price">2,045.50</span>
+                        <span class="price-change positive">+0.8%</span>
+                    </div>
+                    <div class="commodity-stats">
+                        <div class="stat">
+                            <span>24h High:</span>
+                            <span id="xauusd-high">2,051.20</span>
+                        </div>
+                        <div class="stat">
+                            <span>24h Low:</span>
+                            <span id="xauusd-low">2,038.80</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span id="xauusd-volume">125.3M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span id="xauusd-volatility">15.2%</span>
+                        </div>
+                    </div>
+                    <div class="commodity-actions">
+                        <button class="trade-btn buy" onclick="openCommodityTrade('XAUUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="commodityTrade('XAUUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="commodity-card energy" data-commodity="XTIUSD">
+                    <div class="commodity-header">
+                        <div class="commodity-info">
+                            <div class="commodity-icon">
+                                <i class="fas fa-oil-can"></i>
+                            </div>
+                            <div class="commodity-details">
+                                <span class="commodity-symbol">XTI/USD</span>
+                                <span class="commodity-name">Crude Oil</span>
+                            </div>
+                        </div>
+                        <div class="commodity-status">
+                            <span class="status-dot active"></span>
+                            <span>24/7 Trading</span>
+                        </div>
+                    </div>
+                    <div class="commodity-price">
+                        <span class="current-price" id="xtiusd-price">78.25</span>
+                        <span class="price-change negative">-1.2%</span>
+                    </div>
+                    <div class="commodity-stats">
+                        <div class="stat">
+                            <span>24h High:</span>
+                            <span id="xtiusd-high">78.50</span>
+                        </div>
+                        <div class="stat">
+                            <span>24h Low:</span>
+                            <span id="xtiusd-low">78.00</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span id="xtiusd-volume">45.2M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span id="xtiusd-volatility">12.5%</span>
+                        </div>
+                    </div>
+                    <div class="commodity-actions">
+                        <button class="trade-btn buy" onclick="commodityTrade('XTIUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="commodityTrade('XTIUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="commodity-card precious-metals" data-commodity="XAGUSD">
+                    <div class="commodity-header">
+                        <div class="commodity-info">
+                            <div class="commodity-icon">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <div class="commodity-details">
+                                <span class="commodity-symbol">XAG/USD</span>
+                                <span class="commodity-name">Silver Spot</span>
+                            </div>
+                        </div>
+                        <div class="commodity-status">
+                            <span class="status-dot active"></span>
+                            <span>24/7 Trading</span>
+                        </div>
+                    </div>
+                    <div class="commodity-price">
+                        <span class="current-price" id="xagusd-price">23.45</span>
+                        <span class="price-change positive">+2.3%</span>
+                    </div>
+                        <div class="commodity-stats">
+                            <div class="stat">
+                                <span>24h High:</span>
+                                <span id="xagusd-high">23.85</span>
+                            </div>
+                            <div class="stat">
+                                <span>24h Low:</span>
+                                <span id="xagusd-low">23.05</span>
+                            </div>
+                            <div class="stat">
+                                <span>Volume:</span>
+                                <span id="xagusd-volume">25.3M</span>
+                            </div>
+                            <div class="stat">
+                                <span>Volatility:</span>
+                                <span id="xagd-volatility">12.3%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="commodity-actions">
+                        <button class="trade-btn buy" onclick="commodityTrade('XAGUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="commodityTrade('XAGUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="commodity-card base" data-commodity="PLAT">
+                    <div class="commodity-header">
+                        <div class="commodity-info">
+                            <div class="commodity-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="commodity-details">
+                                <span class="commodity-symbol">PLAT</span>
+                                <span class="commodity-name">Platinum</span>
+                            </div>
+                        </div>
+                        <div class="commodity-status">
+                            <span class="status-dot active"></span>
+                            <span>24/7 Trading</span>
+                        </div>
+                    </div>
+                    <div class="commodity-price">
+                        <span class="current-price" id="platinum-price">$950.50</span>
+                        <span class="price-change positive">+1.8%</span>
+                    </div>
+                    <div class="commodity-stats">
+                        <div class="stat">
+                            <span>24h High:</span>
+                            <span id="platinum-high">955.80</span>
+                        </div>
+                        <div class="stat">
+                            <span>24h Low:</span>
+                        </div>
+                        <div class="stat">
+                            <span id="platinum-low">945.20</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span id="platinum-volume">15.2M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span id="platinum-volatility">8.5%</span>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="commodity-actions">
+                        <button class="trade-btn buy" onclick="commodityTrade('PLAT', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="commodityTrade('PLAT', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+
+                <div class="commodity-card energy" data-commodity="NGUSD">
+                    <div class="content">
+                        <div class="commodity-header">
+                            <div class="commodity-info">
+                                <div class="natural-gas-price">
+                                    <i class="natural-gas-price">Natural Gas</i>
+                                </div>
+                                <div class="commodity-details">
+                                    <span class="commodity-symbol">NG/USD</span>
+                                    <span class="commodity-name">Natural Gas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="commodity-status">
+                            <span class="status-dot active"></span>
+                            <span>24/7 Trading</span>
+                        </div>
+                    </div>
+                    <div class="commodity-price">
+                        <span class="price-value" id="ngusd-price">3.25</span>
+                        <span class="price-change negative">-0.5%</span>
+                    </div>
+                    <div class="commodity-stats">
+                        <div class="stat">
+                            <span>24h High:</span>
+                            <span id="ngusd-high">3.35</span>
+                        </div>
+                        <div class="stat">
+                            <span>24h Low:</span>
+                            <span id="ngusd-low">3.15</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volume:</span>
+                            <span id="ngusd-volume">125.3M</span>
+                        </div>
+                        <div class="stat">
+                            <span>Volatility:</span>
+                            <span id="ngusd-volatility">12.5%</span>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="commodity-actions">
+                        <button class="trade-btn buy" onclick="commodityTrade('NGUSD', 'BUY')">
+                            Buy
+                        </button>
+                        <button class="trade-btn sell" onclick="commodityTrade('NGUSD', 'SELL')">
+                            Sell
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Panel -->
+            <section class="trading-panel">
+                <div class="trading-header">
+                    <h3>Quick Trade</h3>
+                    <div class="trading-controls">
+                        <select id="commoditySelect" class="trade-select">
+                            <option value="XAUUSD">Gold (XAU/USD)</option>
+                            <option value="XTIUSD">Crude Oil (XTI/USD)</option>
+                            <option value="XAGUSD">Silver (XAG/USD)</option>
+                            <option value="PLAT">Platinum (PLAT)</option>
+                            <option value="NGUSD">Natural Gas (NG/USD)</option>
+                        </select>
+                        <input type="number" id="tradeAmount" placeholder="Amount" class="trade-input">
+                        <select id="tradeUnit" class="trade-select">
+                            <option value="oz">Ounces</option>
+                            <option value="lot">Lots</option>
+                            <option value="contract">Contracts</option>
+                        </select>
+                        <div class="trade-type">
+                            <button class="trade-type-btn buy active" onclick="setTradeType('buy')">Buy</button>
+                            <button class="trade-type sell" onclick="setTradeType('sell')">Sell</button>
+                        </div>
+                        
+                        <div class="trade-calculations">
+                            <div class="calc-row">
+                                <span>Estimated Cost:</span>
+                                <span id="estimatedCost">$0.00</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Network Fee:</span>
+                                <span id="networkFee">$0.00</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Total Cost:</span>
+                                <span id="totalCost">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="trade-actions">
+                        <button class="btn-cancel" onclick="closeTradeModal()">Cancel</button>
+                        <button class="btn-confirm" onclick="executeTrade()">Place Trade</button>
+                    </div>
+                </section>
+
+                <!-- Market Overview -->
+                <section class="market-overview">
+                    <div class="overview-stats">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-badge">MARKET CAP</div>
+                            </div>
+                            <div class="stat-value">$2.1T</div>
+                            <div class="stat-change positive">+5.2%</div>
+                            <div class="stat-label">Total Market Cap</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="stat-badge">VOLUME</div>
+                            </div>
+                            <div class="stat-value">$125.3B</div>
+                            <div class="stat-change positive">+12.5%</div>
+                            <div class="stat-label">24h Volume</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <div class="stat-badge">RISK</div>
+                            </div>
+                            <div class="stat-value">Medium</div>
+                            <div class="stat-change">15.2%</div>
+                            <div class="stat-label">Risk Level</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="stat-badge">SECURITY</div>
+                        </div>
+                        <div class="stat-value">99.97%</div>
+                        <div class="stat-change positive">+0.02%</div>
+                        <div class="stat-label">Security Score</div>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <!-- AI Analysis -->
+            <section class="ai-analysis">
+                <div class="section-header">
+                    <h2>AI Market Analysis</h2>
+                    <div class="ai-controls">
+                        <button class="ai-control active" onclick="runAIAnalysis()">
+                            <i class="fas fa-brain"></i>
+                            <span>Run Analysis</span>
+                        </button>
+                        <button>
+                            <div class="ai-status">
+                                <span class="pulse-dot"></span>
+                                <span>AI Analyzing...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-results">
+                        <div class="ai-result">
+                            <div class="ai-header">
+                                <span class="ai-recommendation">STRONG BUY</span>
+                                <span class="ai-confidence">87%</span>
+                            </div>
+                            <div class="ai-details">
+                                <div class="ai-reason">Multiple indicators confirm bullish momentum</div>
+                                <div class="ai-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">RSI:</span>
+                                        <span class="metric-value">52.3</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">MACD:</span>
+                                        <span class="metric-value">Bullish</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Signal:</span>
+                                        <span class="metric-value">Buy Signal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-recommendation">
+                                <h4>ENSEMBLE RECOMMENDATION</h4>
+                                <p>Multiple indicators confirm bullish momentum</p>
+                                <div class="ai-confidence">
+                                    <span>Confidence:</span>
+                                    <span>87%</span>
+                                </div>
+                            </div>
+                            <div class="ai-targets">
+                                <div class="target-item">
+                                    <span>Entry:</span>
+                                    <span id="entry-price">2,045.50</span>
+                                </div>
+                                <div class="target-item">
+                                    <span>Target:</span>
+                                    <span id="target-price">2,085.00</span>
+                                </div>
+                                <div class="target-item">
+                                    <span>Stop Loss:</span>
+                                    <span id="stop-loss">2,025.00</span>
+                                </div>
+                            </div>
+                            <div class="ai-timing">
+                                <span>Time Horizon:</span>
+                                <span>4H - 1D</span>
+                            </div>
+                            <div class="ai-explanation">
+                                <p>AI suggests holding position for 4H to 1D</p>
+                            </div>
+                        </div>
+                        
+                        <button class="ai-action-btn" onclick="executeAITrade()">
+                            <i class="fas fa-robot"></i>
+                            <span>Execute Trade</span>
+                        </button>
+                    </div>
+                </section>
+            </section>
+        </section>
+
+        <!-- Trade Modal -->
+        <div id="commodityTradeModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Place Commodity Trade</h3>
+                    <button class="modal-close" onclick="closeTradeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="trade-info">
+                        <div class="trade-pair">
+                            <span>Pair:</span>
+                            <span id="commodityTradePair">XAU/USD</span>
+                        </div>
+                        <div class="trade-type">
+                            <span>Type:</span>
+                            <span id="commodityTradeType">BUY</span>
+                        </div>
+                        <div class="trade-price">
+                            <span>Price:</span>
+                            <span id="commodityTradePrice">2,045.50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trade-form">
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="commodityAmount" value="1" step="0.01" min="0.001">
+                            <select id="commodityUnit">
+                                <option value="oz">Ounces</option>
+                                <option value="lot">Lots</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Stop Loss (%)</label>
+                            <input type="number" id="commodityStopLoss" value="2" step="0.1" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Take Profit (%)</label>
+                            <input type="number" id="commodityTakeProfit" value="4" step="0.1" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Leverage</label>
+                            <select id="everage">
+                                <option value="day">Day</option>
+                                <option value="gtc">Good-Til-Cancelled</option>
+                                <option value="ioc">Immediate-or-Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Order Type</label>
+                            <select id="commodityOrderType">
+                                <option value="market">Market</option>
+                                <option value="limit">Limit</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="limitPriceGroup" style="display: none;">
+                            <label>Limit Price</label>
+                            <input type="number" id="commodityLimitPrice" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="trade-calculations">
+                        <div class="calc-row">
+                            <span>Estimated Cost:</span>
+                            <span id="commodityEstimatedCost">$0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Network Fee:</span>
+                            <span id="commodityNetworkFee">$0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Total Cost:</span>
+                            <span id="commodityTotalCost">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closeTradeModal()">Cancel</button>
+                    <button class="btn-confirm" onclick="executeCommodityTrade()">Place Trade</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Modal -->
+        <div id="tradeModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Place Trade</h3>
+                    <button class="modal-close" onclick="closeTradeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="trade-info">
+                        <div class="trade-pair">
+                            <span>Pair:</span>
+                            <span id="tradePair">XAU/USD</span>
+                        </div>
+                        <div class="trade-type">
+                            <span>Type:</span>
+                            <span id="tradeType">BUY</span>
+                        </div>
+                        <div class="trade-price">
+                            <span>Price:</span>
+                            <span id="tradePrice">2,045.50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trade-form">
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="tradeAmount" value="1" step="0.001" min="0.001">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Stop Loss (%)</label>
+                            <input type="number" id="tradeStopLoss" value="2" step="0.1" min="0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Take Profit (%)</label>
+                            <input type="number" id="tradeTakeProfit" value="4" step="0.1" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="trade-calculations">
+                        <div class="calc-row">
+                            <span>Required Margin:</span>
+                            <span id="requiredMargin">$0.00</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Leverage:</span>
+                            <span id="leverage">50x</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Max Leverage:</span>
+                            <span>100x</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closeTradeModal()">Cancel</button>
+                    <button class="btn-confirm" onclick="executeTrade()">Place Trade</button>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
