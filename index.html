@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Trading Oracle - XAU/USD</title>
+    
+    <!-- React 18 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- TradingView Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        
+        .pulse-animation-red {
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+        
+        .indicator-chart {
+            height: 100px;
+            position: relative;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .status-connected { background-color: #10b981; }
+        .status-reconnecting { background-color: #f59e0b; }
+        .status-disconnected { background-color: #ef4444; }
+        
+        .confidence-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            position: relative;
+        }
+        
+        .confidence-indicator {
+            position: absolute;
+            top: -5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #1f2937;
+            transform: translateX(-50%);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useReducer, useContext, useRef, useCallback } = React;
+        
+        // Twelve Data API Configuration
+        const TWELVE_DATA_API_KEY = '086ef30d2cb6474c8e962bb030d03657'; // Your valid API key
+        
+        // Initial State
+        const initialState = {
+            isActive: false,
+            timeframe: 'M5',
+            sensitivity: 50,
+            marketData: [],
+            indicators: {
+                rsi: [],
+                macd: { macd: [], signal: [], histogram: [] },
+                bollingerBands: { upper: [], middle: [], lower: [] },
+                stochastic: { k: [], d: [] }
+            },
+            patterns: [],
+            currentSignal: { type: 'NEUTRAL', confidence: 0.5, drivers: [] },
+            connectionStatus: 'disconnected',
+            volatility: 'Low',
+            signalHistory: [],
+            lastUpdate: null,
+            isLoading: true, // Added loading state
+            error: null // Added error state
+        };
+        
+        // Reducer for state management
+        function appReducer(state, action) {
+            switch (action.type) {
+                case 'TOGGLE_ORACLE':
+                    return { ...state, isActive: !state.isActive };
+                case 'SET_TIMEFRAME':
+                    return { ...state, timeframe: action.payload };
+                case 'SET_SENSITIVITY':
+                    return { ...state, sensitivity: action.payload };
+                case 'SET_CONNECTION_STATUS':
+                    return { ...state, connectionStatus: action.payload };
+                case 'SET_LOADING':
+                    return { ...state, isLoading: action.payload };
+                case 'SET_ERROR':
+                    return { ...state, error: action.payload, isLoading: false };
+                case 'UPDATE_MARKET_DATA':
+                    return { ...state, marketData: action.payload, error: null };
+                case 'UPDATE_INDICATORS':
+                    return { ...state, indicators: { ...state.indicators, ...action.payload } };
+                case 'UPDATE_PATTERNS':
+                    return { ...state, patterns: action.payload };
+                case 'UPDATE_SIGNAL':
+                    return { ...state, currentSignal: action.payload };
+                case 'UPDATE_VOLATILITY':
+                    return { ...state, volatility: action.payload };
+                case 'ADD_SIGNAL_HISTORY':
+                    return { 
+                        ...state, 
+                        signalHistory: [action.payload, ...state.signalHistory].slice(0, 50) 
+                    };
+                case 'SET_LAST_UPDATE':
+                    return { ...state, lastUpdate: action.payload };
+                default:
+                    return state;
+            }
+        }
+        
+        // Context for global state
+        const AppContext = React.createContext();
+        
+        // Technical Indicators Implementation
+        class TechnicalIndicators {
+            static calculateSMA(data, period) {
+                if (!data || data.length < period) return [];
+                const result = [];
+                for (let i = period - 1; i < data.length; i++) {
+                    const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+                    result.push(sum / period);
+                }
+                return result;
+            }
+            
+            static calculateEMA(data, period) {
+                if (!data || data.length === 0) return [];
+                const multiplier = 2 / (period + 1);
+                let ema = data[0];
+                const result = [ema];
+                
+                for (let i = 1; i < data.length; i++) {
+                    ema = (data[i] * multiplier) + (ema * (1 - multiplier));
+                    result.push(ema);
+                }
+                
+                return result;
+            }
+            
+            static calculateRSI(data, period = 14) {
+                if (!data || data.length < period + 1) return [];
+                const changes = [];
+                for (let i = 1; i < data.length; i++) {
+                    changes.push(data[i] - data[i - 1]);
+                }
+                
+                const gains = changes.map(change => change > 0 ? change : 0);
+                const losses = changes.map(change => change < 0 ? Math.abs(change) : 0);
+                
+                const avgGains = this.calculateSMA(gains, period);
+                const avgLosses = this.calculateSMA(losses, period);
+                
+                const rsi = [];
+                for (let i = 0; i < avgGains.length; i++) {
+                    const rs = avgLosses[i] === 0 ? Infinity : avgGains[i] / avgLosses[i];
+                    rsi.push(100 - (100 / (1 + rs)));
+                }
+                
+                return rsi;
+            }
+            
+            static calculateMACD(data, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+                if (!data || data.length < slowPeriod) return { macd: [], signal: [], histogram: [] };
+                const fastEMA = this.calculateEMA(data, fastPeriod);
+                const slowEMA = this.calculateEMA(data, slowPeriod);
+                
+                const macdLine = [];
+                const startIndex = slowPeriod - fastPeriod;
+                
+                for (let i = 0; i < fastEMA.length - startIndex; i++) {
+                    macdLine.push(fastEMA[i + startIndex] - slowEMA[i]);
+                }
+                
+                const signalLine = this.calculateEMA(macdLine, signalPeriod);
+                const histogram = [];
+                
+                for (let i = 0; i < signalLine.length; i++) {
+                    histogram.push(macdLine[i + (macdLine.length - signalLine.length)] - signalLine[i]);
+                }
+                
+                return {
+                    macd: macdLine,
+                    signal: signalLine,
+                    histogram: histogram
+                };
+            }
+            
+            static calculateBollingerBands(data, period = 20, stdDev = 2) {
+                if (!data || data.length < period) return { upper: [], middle: [], lower: [] };
+                const middle = this.calculateSMA(data, period);
+                const upper = [];
+                const lower = [];
+                
+                for (let i = period - 1; i < data.length; i++) {
+                    const slice = data.slice(i - period + 1, i + 1);
+                    const mean = middle[i - period + 1];
+                    
+                    const squaredDiffs = slice.map(value => Math.pow(value - mean, 2));
+                    const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / period;
+                    const stdDeviation = Math.sqrt(avgSquaredDiff);
+                    
+                    upper.push(mean + (stdDeviation * stdDev));
+                    lower.push(mean - (stdDeviation * stdDev));
+                }
+                
+                return { upper, middle, lower };
+            }
+            
+            static calculateStochastic(highs, lows, closes, kPeriod = 14, dPeriod = 3) {
+                if (!highs || !lows || !closes || highs.length < kPeriod) return { k: [], d: [] };
+                const kValues = [];
+                
+                for (let i = kPeriod - 1; i < closes.length; i++) {
+                    const highestHigh = Math.max(...highs.slice(i - kPeriod + 1, i + 1));
+                    const lowestLow = Math.min(...lows.slice(i - kPeriod + 1, i + 1));
+                    
+                    const k = (highestHigh === lowestLow) ? 100 : ((closes[i] - lowestLow) / (highestHigh - lowestLow)) * 100;
+                    kValues.push(k);
+                }
+                
+                const dValues = this.calculateSMA(kValues, dPeriod);
+                
+                return { k: kValues, d: dValues };
+            }
+        }
+        
+        // Candlestick Pattern Recognition
+        class PatternRecognition {
+            static detectEngulfingPattern(candles) {
+                if (!candles || candles.length < 2) return null;
+                
+                const prev = candles[candles.length - 2];
+                const current = candles[candles.length - 1];
+                
+                // Bullish Engulfing
+                if (prev.close < prev.open && current.close > current.open &&
+                    current.open < prev.close && current.close > prev.open) {
+                    return { type: 'Bullish Engulfing', strength: 0.8 };
+                }
+                
+                // Bearish Engulfing
+                if (prev.close > prev.open && current.close < current.open &&
+                    current.open > prev.close && current.close < prev.open) {
+                    return { type: 'Bearish Engulfing', strength: 0.8 };
+                }
+                
+                return null;
+            }
+            
+            static detectDojiPattern(candle) {
+                if (!candle) return null;
+                const bodySize = Math.abs(candle.close - candle.open);
+                const range = candle.high - candle.low;
+                
+                if (range > 0 && bodySize < range * 0.1) {
+                    return { type: 'Doji', strength: 0.5 };
+                }
+                
+                return null;
+            }
+            
+            static detectHammerPattern(candle) {
+                if (!candle) return null;
+                const bodySize = Math.abs(candle.close - candle.open);
+                const upperShadow = candle.high - Math.max(candle.open, candle.close);
+                const lowerShadow = Math.min(candle.open, candle.close) - candle.low;
+                
+                if (lowerShadow > bodySize * 2 && upperShadow < bodySize * 0.5) {
+                    return { type: 'Hammer', strength: 0.6 };
+                }
+                
+                return null;
+            }
+            
+            static detectMorningStarPattern(candles) {
+                if (!candles || candles.length < 3) return null;
+                
+                const first = candles[candles.length - 3];
+                const second = candles[candles.length - 2];
+                const third = candles[candles.length - 1];
+                
+                if (first.close < first.open && 
+                    Math.abs(second.close - second.open) < (first.high - first.low) * 0.3 &&
+                    third.close > third.open &&
+                    third.close > (first.open + first.close) / 2) {
+                    return { type: 'Morning Star', strength: 0.7 };
+                }
+                
+                return null;
+            }
+            
+            static detectEveningStarPattern(candles) {
+                if (!candles || candles.length < 3) return null;
+                
+                const first = candles[candles.length - 3];
+                const second = candles[candles.length - 2];
+                const third = candles[candles.length - 1];
+                
+                if (first.close > first.open && 
+                    Math.abs(second.close - second.open) < (first.high - first.low) * 0.3 &&
+                    third.close < third.open &&
+                    third.close < (first.open + first.close) / 2) {
+                    return { type: 'Evening Star', strength: 0.7 };
+                }
+                
+                return null;
+            }
+            
+            static detectAllPatterns(candles) {
+                const patterns = [];
+                
+                // Single candle patterns
+                if (candles && candles.length > 0) {
+                    const doji = this.detectDojiPattern(candles[candles.length - 1]);
+                    if (doji) patterns.push(doji);
+                    
+                    const hammer = this.detectHammerPattern(candles[candles.length - 1]);
+                    if (hammer) patterns.push(hammer);
+                }
+                
+                // Two candle patterns
+                if (candles && candles.length > 1) {
+                    const engulfing = this.detectEngulfingPattern(candles);
+                    if (engulfing) patterns.push(engulfing);
+                }
+                
+                // Three candle patterns
+                if (candles && candles.length > 2) {
+                    const morningStar = this.detectMorningStarPattern(candles);
+                    if (morningStar) patterns.push(morningStar);
+                    
+                    const eveningStar = this.detectEveningStarPattern(candles);
+                    if (eveningStar) patterns.push(eveningStar);
+                }
+                
+                return patterns;
+            }
+        }
+        
+        // Synaptic Intelligence Engine (SIE)
+        class SynapticIntelligenceEngine {
+            static generateSignal(indicators, patterns, sensitivity) {
+                const { rsi, macd, bollingerBands, stochastic } = indicators;
+                
+                // Initialize signal components
+                let buyScore = 0;
+                let sellScore = 0;
+                const drivers = [];
+                
+                // RSI Analysis
+                if (rsi && rsi.length > 0) {
+                    const latestRSI = rsi[rsi.length - 1];
+                    if (latestRSI < 30) {
+                        buyScore += 0.3;
+                        drivers.push('Oversold RSI');
+                    } else if (latestRSI > 70) {
+                        sellScore += 0.3;
+                        drivers.push('Overbought RSI');
+                    }
+                }
+                
+                // MACD Analysis
+                if (macd && macd.histogram && macd.histogram.length > 0) {
+                    const latestHistogram = macd.histogram[macd.histogram.length - 1];
+                    if (latestHistogram > 0) {
+                        buyScore += 0.25;
+                        drivers.push('Bullish MACD');
+                    } else {
+                        sellScore += 0.25;
+                        drivers.push('Bearish MACD');
+                    }
+                }
+                
+                // Stochastic Analysis
+                if (stochastic && stochastic.k && stochastic.k.length > 0) {
+                    const latestStochK = stochastic.k[stochastic.k.length - 1];
+                    const latestStochD = stochastic.d && stochastic.d.length > 0 ? stochastic.d[stochastic.d.length - 1] : 50;
+                    if (latestStochK < 20 && latestStochD < 20) {
+                        buyScore += 0.2;
+                        drivers.push('Oversold Stochastic');
+                    } else if (latestStochK > 80 && latestStochD > 80) {
+                        sellScore += 0.2;
+                        drivers.push('Overbought Stochastic');
+                    }
+                }
+                
+                // Pattern Analysis
+                if (patterns) {
+                    patterns.forEach(pattern => {
+                        if (pattern.type.includes('Bullish') || pattern.type === 'Hammer' || pattern.type === 'Morning Star') {
+                            buyScore += pattern.strength * 0.5;
+                            drivers.push(pattern.type);
+                        } else if (pattern.type.includes('Bearish') || pattern.type === 'Evening Star') {
+                            sellScore += pattern.strength * 0.5;
+                            drivers.push(pattern.type);
+                        } else if (pattern.type === 'Doji') {
+                            // Doji is neutral but indicates potential reversal
+                            if (rsi && rsi.length > 0 && rsi[rsi.length - 1] < 30) {
+                                buyScore += 0.15;
+                                drivers.push('Doji + Oversold');
+                            } else if (rsi && rsi.length > 0 && rsi[rsi.length - 1] > 70) {
+                                sellScore += 0.15;
+                                drivers.push('Doji + Overbought');
+                            }
+                        }
+                    });
+                }
+                
+                // Apply sensitivity factor
+                const sensitivityFactor = sensitivity / 50; // Normalize to 0-2 range
+                buyScore *= sensitivityFactor;
+                sellScore *= sensitivityFactor;
+                
+                // Determine final signal
+                let signalType, confidence;
+                
+                if (buyScore > sellScore) {
+                    confidence = Math.min(buyScore, 1);
+                    if (confidence > 0.75) {
+                        signalType = 'STRONG BUY';
+                    } else if (confidence > 0.55) {
+                        signalType = 'BUY';
+                    } else if (confidence > 0.45) {
+                        signalType = 'NEUTRAL';
+                    } else {
+                        signalType = 'AMBIGUOUS';
+                    }
+                } else {
+                    confidence = Math.min(sellScore, 1);
+                    if (confidence > 0.75) {
+                        signalType = 'STRONG SELL';
+                    } else if (confidence > 0.55) {
+                        signalType = 'SELL';
+                    } else if (confidence > 0.45) {
+                        signalType = 'NEUTRAL';
+                    } else {
+                        signalType = 'AMBIGUOUS';
+                    }
+                }
+                
+                return {
+                    type: signalType,
+                    confidence: confidence,
+                    drivers: drivers.slice(0, 3) // Limit to top 3 drivers
+                };
+            }
+            
+            static calculateVolatility(candles) {
+                if (!candles || candles.length < 20) return 'Low';
+                
+                const recentCandles = candles.slice(-20);
+                const priceChanges = [];
+                
+                for (let i = 1; i < recentCandles.length; i++) {
+                    const change = Math.abs(recentCandles[i].close - recentCandles[i-1].close) / recentCandles[i-1].close;
+                    priceChanges.push(change);
+                }
+                
+                const avgChange = priceChanges.reduce((a, b) => a + b, 0) / priceChanges.length;
+                
+                if (avgChange > 0.005) return 'High';
+                if (avgChange > 0.002) return 'Medium';
+                return 'Low';
+            }
+        }
+        
+        // Data Fetching Service
+        class DataService {
+            static async fetchMarketData(timeframe) {
+                try {
+                    // Map timeframe to Twelve Data format
+                    const intervalMap = {
+                        'M1': '1min',
+                        'M5': '5min',
+                        'M15': '15min',
+                        'H1': '1hour'
+                    };
+                    
+                    const interval = intervalMap[timeframe] || '5min';
+                    const url = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=${interval}&outputsize=100&apikey=${TWELVE_DATA_API_KEY}`;
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.status === 'error') {
+                        throw new Error(data.message);
+                    }
+                    
+                    // Transform data to our format
+                    return data.values.map(item => ({
+                        time: new Date(item.datetime).getTime() / 1000,
+                        open: parseFloat(item.open),
+                        high: parseFloat(item.high),
+                        low: parseFloat(item.low),
+                        close: parseFloat(item.close)
+                    }));
+                } catch (error) {
+                    console.error('Error fetching market data:', error);
+                    // Return mock data for demo purposes
+                    return this.generateMockData(100);
+                }
+            }
+            
+            static generateMockData(count) {
+                const data = [];
+                let price = 1900 + Math.random() * 100;
+                const now = Date.now() / 1000;
+                
+                for (let i = count - 1; i >= 0; i--) {
+                    const volatility = 0.001 + Math.random() * 0.002;
+                    const change = (Math.random() - 0.5) * 2 * volatility * price;
+                    
+                    const open = price;
+                    const close = price + change;
+                    const high = Math.max(open, close) + Math.random() * volatility * price;
+                    const low = Math.min(open, close) - Math.random() * volatility * price;
+                    
+                    data.push({
+                        time: now - (i * 300), // 5-minute intervals
+                        open,
+                        high,
+                        low,
+                        close
+                    });
+                    
+                    price = close;
+                }
+                
+                return data;
+            }
+        }
+        
+        // Main App Component
+        function App() {
+            const [state, dispatch] = useReducer(appReducer, initialState);
+            const chartRef = useRef(null);
+            const rsiChartRef = useRef(null);
+            const macdChartRef = useRef(null);
+            const pollingIntervalRef = useRef(null);
+            
+            // Initialize charts
+            useEffect(() => {
+                if (chartRef.current) {
+                    const chart = LightweightCharts.createChart(chartRef.current, {
+                        layout: { backgroundColor: 'rgba(17, 24, 39, 0.8)', textColor: '#d1d5db' },
+                        grid: { vertLines: { color: 'rgba(75, 85, 99, 0.3)' }, horzLines: { color: 'rgba(75, 85, 99, 0.3)' } },
+                        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                        rightPriceScale: { borderColor: 'rgba(75, 85, 99, 0.3)' },
+                        timeScale: { borderColor: 'rgba(75, 85, 99, 0.3)', timeVisible: true, secondsVisible: false },
+                    });
+                    chartRef.current.candlestickSeries = chart.addCandlestickSeries({ upColor: '#10b981', downColor: '#ef4444', borderDownColor: '#ef4444', borderUpColor: '#10b981', wickDownColor: '#ef4444', wickUpColor: '#10b981' });
+                    chartRef.current.bbUpperSeries = chart.addLineSeries({ color: 'rgba(59, 130, 246, 0.5)', lineWidth: 1 });
+                    chartRef.current.bbMiddleSeries = chart.addLineSeries({ color: 'rgba(156, 163, 175, 0.5)', lineWidth: 1 });
+                    chartRef.current.bbLowerSeries = chart.addLineSeries({ color: 'rgba(59, 130, 246, 0.5)', lineWidth: 1 });
+                    chartRef.current.chart = chart;
+                }
+                if (rsiChartRef.current) {
+                    const chart = LightweightCharts.createChart(rsiChartRef.current, { layout: { backgroundColor: 'rgba(17, 24, 39, 0.8)', textColor: '#d1d5db' }, grid: { vertLines: { color: 'rgba(75, 85, 99, 0.3)' }, horzLines: { color: 'rgba(75, 85, 99, 0.3)' } }, rightPriceScale: { borderColor: 'rgba(75, 85, 99, 0.3)', min: 0, max: 100 }, timeScale: { borderColor: 'rgba(75, 85, 99, 0.3)', visible: false } });
+                    rsiChartRef.current.rsiSeries = chart.addLineSeries({ color: '#8b5cf6', lineWidth: 2 });
+                    rsiChartRef.current.overboughtSeries = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.5)', lineWidth: 1 });
+                    rsiChartRef.current.oversoldSeries = chart.addLineSeries({ color: 'rgba(34, 197, 94, 0.5)', lineWidth: 1 });
+                    rsiChartRef.current.chart = chart;
+                }
+                if (macdChartRef.current) {
+                    const chart = LightweightCharts.createChart(macdChartRef.current, { layout: { backgroundColor: 'rgba(17, 24, 39, 0.8)', textColor: '#d1d5db' }, grid: { vertLines: { color: 'rgba(75, 85, 99, 0.3)' }, horzLines: { color: 'rgba(75, 85, 99, 0.3)' } }, rightPriceScale: { borderColor: 'rgba(75, 85, 99, 0.3)' }, timeScale: { borderColor: 'rgba(75, 85, 99, 0.3)', visible: false } });
+                    macdChartRef.current.macdLineSeries = chart.addLineSeries({ color: '#3b82f6', lineWidth: 2 });
+                    macdChartRef.current.signalLineSeries = chart.addLineSeries({ color: '#ef4444', lineWidth: 2 });
+                    macdChartRef.current.histogramSeries = chart.addHistogramSeries({ color: '#10b981' });
+                    macdChartRef.current.chart = chart;
+                }
+                return () => {
+                    if (chartRef.current?.chart) chartRef.current.chart.remove();
+                    if (rsiChartRef.current?.chart) rsiChartRef.current.chart.remove();
+                    if (macdChartRef.current?.chart) macdChartRef.current.chart.remove();
+                };
+            }, []);
+            
+            // Update charts when data changes - CRITICAL FIX IS HERE
+            useEffect(() => {
+                if (state.marketData.length > 0 && chartRef.current?.candlestickSeries) {
+                    chartRef.current.candlestickSeries.setData(state.marketData);
+                    
+                    // Bollinger Bands Update with Guards
+                    if (state.indicators.bollingerBands.upper.length > 0 && state.marketData.length > 19) {
+                        const bbUpperData = state.indicators.bollingerBands.upper.map((val, i) => ({ time: state.marketData[i + 19].time, value: val }));
+                        const bbMiddleData = state.indicators.bollingerBands.middle.map((val, i) => ({ time: state.marketData[i + 19].time, value: val }));
+                        const bbLowerData = state.indicators.bollingerBands.lower.map((val, i) => ({ time: state.marketData[i + 19].time, value: val }));
+                        chartRef.current.bbUpperSeries.setData(bbUpperData);
+                        chartRef.current.bbMiddleSeries.setData(bbMiddleData);
+                        chartRef.current.bbLowerSeries.setData(bbLowerData);
+                    }
+                }
+                
+                // RSI Update with Guards
+                if (state.indicators.rsi.length > 0 && state.marketData.length > 13 && rsiChartRef.current?.rsiSeries) {
+                    const rsiData = state.indicators.rsi.map((val, i) => ({ time: state.marketData[i + 13].time, value: val }));
+                    rsiChartRef.current.rsiSeries.setData(rsiData);
+                    const overboughtData = rsiData.map(item => ({ time: item.time, value: 70 }));
+                    const oversoldData = rsiData.map(item => ({ time: item.time, value: 30 }));
+                    rsiChartRef.current.overboughtSeries.setData(overboughtData);
+                    rsiChartRef.current.oversoldSeries.setData(oversoldData);
+                }
+                
+                // MACD Update with Guards
+                if (state.indicators.macd.macd && state.indicators.macd.macd.length > 0 && state.marketData.length > 25 && macdChartRef.current?.macdLineSeries) {
+                    const macdData = state.indicators.macd.macd.map((val, i) => ({ time: state.marketData[i + 25].time, value: val }));
+                    const signalData = state.indicators.macd.signal.map((val, i) => ({ time: state.marketData[i + 25].time, value: val }));
+                    const histogramData = state.indicators.macd.histogram.map((val, i) => ({ time: state.marketData[i + 25].time, value: val, color: val >= 0 ? '#10b981' : '#ef4444' }));
+                    macdChartRef.current.macdLineSeries.setData(macdData);
+                    macdChartRef.current.signalLineSeries.setData(signalData);
+                    macdChartRef.current.histogramSeries.setData(histogramData);
+                }
+            }, [state.marketData, state.indicators]);
+            
+            // Data fetching and processing
+            const fetchDataAndProcess = useCallback(async () => {
+                try {
+                    dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'reconnecting' });
+                    dispatch({ type: 'SET_LOADING', payload: true });
+                    dispatch({ type: 'SET_ERROR', payload: null });
+                    
+                    const marketData = await DataService.fetchMarketData(state.timeframe);
+                    
+                    if (!marketData || marketData.length < 30) {
+                        throw new Error("Insufficient data received to perform analysis.");
+                    }
+
+                    dispatch({ type: 'UPDATE_MARKET_DATA', payload: marketData });
+                    
+                    const closes = marketData.map(candle => candle.close);
+                    const highs = marketData.map(candle => candle.high);
+                    const lows = marketData.map(candle => candle.low);
+                    
+                    const rsi = TechnicalIndicators.calculateRSI(closes);
+                    const macd = TechnicalIndicators.calculateMACD(closes);
+                    const bollingerBands = TechnicalIndicators.calculateBollingerBands(closes);
+                    const stochastic = TechnicalIndicators.calculateStochastic(highs, lows, closes);
+                    
+                    dispatch({ type: 'UPDATE_INDICATORS', payload: { rsi, macd, bollingerBands, stochastic } });
+                    
+                    const patterns = PatternRecognition.detectAllPatterns(marketData);
+                    dispatch({ type: 'UPDATE_PATTERNS', payload: patterns });
+                    
+                    const signal = SynapticIntelligenceEngine.generateSignal({ rsi, macd, bollingerBands, stochastic }, patterns, state.sensitivity);
+                    dispatch({ type: 'UPDATE_SIGNAL', payload: signal });
+                    
+                    const volatility = SynapticIntelligenceEngine.calculateVolatility(marketData);
+                    dispatch({ type: 'UPDATE_VOLATILITY', payload: volatility });
+                    
+                    if (signal.confidence > 0.55) {
+                        dispatch({ type: 'ADD_SIGNAL_HISTORY', payload: { timestamp: new Date().toLocaleTimeString(), signal: signal.type, confidence: (signal.confidence * 100).toFixed(1) + '%', price: marketData[marketData.length - 1].close.toFixed(2), drivers: signal.drivers.join(', ') } });
+                    }
+                    
+                    dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'connected' });
+                    dispatch({ type: 'SET_LAST_UPDATE', payload: new Date() });
+                } catch (error) {
+                    console.error('Error in data processing:', error);
+                    dispatch({ type: 'SET_ERROR', payload: error.message });
+                    dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'disconnected' });
+                } finally {
+                    dispatch({ type: 'SET_LOADING', payload: false });
+                }
+            }, [state.timeframe, state.sensitivity]);
+            
+            // Start/stop polling
+            useEffect(() => {
+                if (state.isActive) {
+                    fetchDataAndProcess();
+                    const interval = state.volatility === 'High' ? 10000 : state.volatility === 'Medium' ? 20000 : 30000;
+                    pollingIntervalRef.current = setInterval(fetchDataAndProcess, interval);
+                } else {
+                    if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+                }
+                return () => { if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current); };
+            }, [state.isActive, state.volatility, fetchDataAndProcess]);
+            
+            // Initial data fetch
+            useEffect(() => {
+                fetchDataAndProcess();
+            }, []); // Run once on mount
+
+            const getSignalStyle = () => {
+                if (state.currentSignal.type.includes('STRONG BUY')) return { color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', animation: 'pulse-animation' };
+                if (state.currentSignal.type.includes('BUY')) return { color: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/30', animation: '' };
+                if (state.currentSignal.type.includes('STRONG SELL')) return { color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30', animation: 'pulse-animation-red' };
+                if (state.currentSignal.type.includes('SELL')) return { color: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/30', animation: '' };
+                if (state.currentSignal.type === 'AMBIGUOUS') return { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', animation: '' };
+                return { color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/30', animation: '' };
+            };
+            
+            const signalStyle = getSignalStyle();
+            
+            if (state.isLoading) {
+                return (
+                    <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="spinner-border animate-spin inline-block w-12 h-12 border-4 rounded-full border-blue-500 border-t-transparent"></div>
+                            <p className="mt-4 text-lg">Initializing Neural Trading Oracle...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (state.error) {
+                return (
+                    <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
+                        <div className="glass-morphism rounded-lg p-8 max-w-md text-center">
+                            <i className="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                            <h2 className="text-2xl font-bold mb-2">Connection Error</h2>
+                            <p className="text-gray-400 mb-4">{state.error}</p>
+                            <p className="text-sm text-gray-500">The system is using simulated data for demonstration.</p>
+                            <button onClick={() => window.location.reload()} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg">
+                                Retry
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return (
+                <AppContext.Provider value={{ state, dispatch }}>
+                    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+                        <div className="max-w-7xl mx-auto">
+                            <header className="glass-morphism rounded-lg p-6 mb-6">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-white mb-2">Neural Trading Oracle</h1>
+                                        <p className="text-gray-400">XAU/USD - Advanced Predictive Analysis System</p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="text-right">
+                                            <p className="text-sm text-gray-400">Connection Status</p>
+                                            <p className="flex items-center">
+                                                <span className={`status-dot status-${state.connectionStatus}`}></span>
+                                                <span className="capitalize">{state.connectionStatus}</span>
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm text-gray-400">Last Update</p>
+                                            <p>{state.lastUpdate ? state.lastUpdate.toLocaleTimeString() : 'Never'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+                            
+                            <div className="glass-morphism rounded-lg p-6 mb-6">
+                                <h2 className="text-xl font-semibold mb-4">Strategy Control Panel</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <button onClick={() => dispatch({ type: 'TOGGLE_ORACLE' })} className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${state.isActive ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+                                            {state.isActive ? 'Pause Oracle' : 'Activate Oracle'}
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Timeframe</label>
+                                        <select value={state.timeframe} onChange={(e) => dispatch({ type: 'SET_TIMEFRAME', payload: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="M1">M1 (1 Minute)</option>
+                                            <option value="M5">M5 (5 Minutes)</option>
+                                            <option value="M15">M15 (15 Minutes)</option>
+                                            <option value="H1">H1 (1 Hour)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Sensitivity: {state.sensitivity}</label>
+                                        <input type="range" min="0" max="100" value={state.sensitivity} onChange={(e) => dispatch({ type: 'SET_SENSITIVITY', payload: parseInt(e.target.value) })} className="w-full" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div className={`glass-morphism rounded-lg p-6 border ${signalStyle.border} ${signalStyle.animation}`}>
+                                    <h2 className="text-xl font-semibold mb-4">Predictive Signal</h2>
+                                    <div className={`text-3xl font-bold ${signalStyle.color} mb-2`}>{state.currentSignal.type}</div>
+                                    <div className="mb-4">
+                                        <div className="flex justify-between text-sm mb-1"><span>Confidence</span><span>{(state.currentSignal.confidence * 100).toFixed(1)}%</span></div>
+                                        <div className="confidence-bar"><div className="confidence-indicator" style={{ left: `${state.currentSignal.confidence * 100}%` }}></div></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-400 mb-1">Primary Drivers:</p>
+                                        <p className="text-sm">{state.currentSignal.drivers.length > 0 ? state.currentSignal.drivers.join(', ') : 'No significant drivers detected'}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="glass-morphism rounded-lg p-6">
+                                    <h2 className="text-xl font-semibold mb-4">AI Brain Status</h2>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between"><span className="text-gray-400">Confidence Score</span><span>{(state.currentSignal.confidence * 100).toFixed(1)}%</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-400">Market Volatility</span><span className={state.volatility === 'High' ? 'text-red-400' : state.volatility === 'Medium' ? 'text-yellow-400' : 'text-green-400'}>{state.volatility}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-400">Patterns Detected</span><span>{state.patterns.length}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-400">Data Points</span><span>{state.marketData.length}</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="glass-morphism rounded-lg p-6">
+                                    <h2 className="text-xl font-semibold mb-4">Pattern Recognition</h2>
+                                    <div className="space-y-2">
+                                        {state.patterns.length > 0 ? state.patterns.map((pattern, index) => (
+                                            <div key={index} className="flex justify-between items-center">
+                                                <span className="text-sm">{pattern.type}</span>
+                                                <div className="flex items-center">
+                                                    <div className="w-16 bg-gray-700 rounded-full h-2 mr-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${pattern.strength * 100}%` }}></div></div>
+                                                    <span className="text-xs text-gray-400">{(pattern.strength * 100).toFixed(0)}%</span>
+                                                </div>
+                                            </div>
+                                        )) : <p className="text-sm text-gray-400">No patterns detected</p>}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="glass-morphism rounded-lg p-6 mb-6">
+                                <h2 className="text-xl font-semibold mb-4">Market Analysis</h2>
+                                <div className="chart-container mb-4" ref={chartRef}></div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div className="indicator-chart" ref={rsiChartRef}></div>
+                                    <div className="indicator-chart" ref={macdChartRef}></div>
+                                </div>
+                            </div>
+                            
+                            <div className="glass-morphism rounded-lg p-6">
+                                <h2 className="text-xl font-semibold mb-4">Signal History & Audit Trail</h2>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead><tr className="border-b border-gray-700"><th className="text-left py-2 px-4">Timestamp</th><th className="text-left py-2 px-4">Signal</th><th className="text-left py-2 px-4">Confidence</th><th className="text-left py-2 px-4">Price</th><th className="text-left py-2 px-4">Primary Drivers</th></tr></thead>
+                                        <tbody>
+                                            {state.signalHistory.length > 0 ? state.signalHistory.map((item, index) => (
+                                                <tr key={index} className="border-b border-gray-800">
+                                                    <td className="py-2 px-4">{item.timestamp}</td>
+                                                    <td className={`py-2 px-4 font-medium ${item.signal.includes('BUY') ? 'text-green-400' : item.signal.includes('SELL') ? 'text-red-400' : 'text-gray-400'}`}>{item.signal}</td>
+                                                    <td className="py-2 px-4">{item.confidence}</td>
+                                                    <td className="py-2 px-4">${item.price}</td>
+                                                    <td className="py-2 px-4">{item.drivers}</td>
+                                                </tr>
+                                            )) : <tr><td colSpan="5" className="py-4 text-center text-gray-400">No signal history yet. Activate the Oracle to begin analysis.</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </AppContext.Provider>
+            );
+        }
+        
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
