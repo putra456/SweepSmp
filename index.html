@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neural Trading Oracle - XAU/USD</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+    }
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+    .pulse-sell {
+      animation: pulse-sell 1.5s infinite;
+    }
+    @keyframes pulse-sell {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useReducer, createContext, useContext, useRef } = React;
+
+    // ========== API CONFIGURATION ==========
+    const TWELVE_DATA_API_KEY = '086ef30d2cb6474c8e962bb030d03657'; // ⚠️ REPLACE WITH A VALID KEY
+
+    // ========== CONTEXT & REDUCER ==========
+    const OracleContext = createContext();
+
+    const initialState = {
+      isOracleActive: true,
+      timeframe: '5min',
+      sensitivity: 70,
+      latestPrice: null,
+      lastSignal: null,
+      signalHistory: [],
+      indicators: {
+        rsi: [],
+        macd: { macd: [], signal: [], histogram: [] },
+        bollinger: { upper: [], middle: [], lower: [] }
+      },
+      detectedPatterns: [],
+      confidenceScore: 0.5,
+      volatility: 'Low',
+      primaryDrivers: '',
+      connectionStatus: 'Connected',
+      candles: []
+    };
+
+    const oracleReducer = (state, action) => {
+      switch (action.type) {
+        case 'SET_ORACLE_ACTIVE':
+          return { ...state, isOracleActive: action.payload };
+        case 'SET_TIMEFRAME':
+          return { ...state, timeframe: action.payload };
+        case 'SET_SENSITIVITY':
+          return { ...state, sensitivity: action.payload };
+        case 'UPDATE_MARKET_DATA':
+          return { ...state, candles: action.payload.candles, latestPrice: action.payload.latestPrice };
+        case 'UPDATE_INDICATORS':
+          return { ...state, indicators: action.payload };
+        case 'UPDATE_PATTERNS':
+          return { ...state, detectedPatterns: action.payload };
+        case 'GENERATE_SIGNAL':
+          return {
+            ...state,
+            lastSignal: action.payload.signal,
+            confidenceScore: action.payload.confidence,
+            primaryDrivers: action.payload.drivers,
+            volatility: action.payload.volatility,
+            signalHistory: [
+              {
+                timestamp: new Date().toISOString(),
+                signal: action.payload.signal,
+                confidence: action.payload.confidence,
+                price: state.latestPrice,
+                drivers: action.payload.drivers
+              },
+              ...state.signalHistory.slice(0, 49)
+            ]
+          };
+        case 'SET_CONNECTION_STATUS':
+          return { ...state, connectionStatus: action.payload };
+        default:
+          return state;
+      }
+    };
+
+    // ========== TECHNICAL INDICATORS ==========
+    const calculateRSI = (prices, period = 14) => {
+      if (prices.length < period + 1) return [];
+      const changes = prices.slice(1).map((p, i) => p - prices[i]);
+      const gains = changes.map(c => c > 0 ? c : 0);
+      const losses = changes.map(c => c < 0 ? -c : 0);
+
+      let avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+      let avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+
+      const rsi = Array(period).fill(null);
+      for (let i = period; i < prices.length; i++) {
+        avgGain = (avgGain * (period - 1) + gains[i]) / period;
+        avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+        const rs = avgLoss === 0 ? Infinity : avgGain / avgLoss;
+        rsi.push(100 - (100 / (1 + rs)));
+      }
+      return rsi;
+    };
+
+    const calculateMACD = (prices, fast = 12, slow = 26, signal = 9) => {
+      const ema = (data, period) => {
+        const k = 2 / (period + 1);
+        const ema = [data[0]];
+        for (let i = 1; i < data.length; i++) {
+          ema[i] = data[i] * k + ema[i - 1] * (1 - k);
+        }
+        return ema;
+      };
+
+      if (prices.length < slow + signal) return { macd: [], signal: [], histogram: [] };
+
+      const fastEma = ema(prices, fast);
+      const slowEma = ema(prices, slow);
+      const macdLine = fastEma.map((f, i) => f - slowEma[i]);
+      const signalLine = ema(macdLine.slice(slow - 1), signal);
+      const histogram = macdLine.slice(slow - 1).map((m, i) => m - signalLine[i]);
+
+      return {
+        macd: macdLine.slice(slow - 1),
+        signal: signalLine,
+        histogram
+      };
+    };
+
+    const calculateBollingerBands = (prices, period = 20, stdDev = 2) => {
+      if (prices.length < period) return { upper: [], middle: [], lower: [] };
+      const sma = prices.map((_, i, arr) => {
+        if (i < period - 1) return null;
+        const slice = arr.slice(i - period + 1, i + 1);
+        return slice.reduce((a, b) => a + b, 0) / period;
+      }).filter(v => v !== null);
+
+      const upper = [], middle = [], lower = [];
+      for (let i = 0; i < sma.length; i++) {
+        const slice = prices.slice(i, i + period);
+        const mean = sma[i];
+        const std = Math.sqrt(slice.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / period);
+        upper.push(mean + (stdDev * std));
+        middle.push(mean);
+        lower.push(mean - (stdDev * std));
+      }
+
+      return { upper, middle, lower };
+    };
+
+    // ========== CANDLESTICK PATTERN RECOGNITION ==========
+    const detectCandlestickPatterns = (candles) => {
+      if (candles.length < 3) return [];
+      const patterns = [];
+      const len = candles.length;
+
+      const isBullishEngulfing = (i) => {
+        if (i < 1) return false;
+        const prev = candles[i - 1];
+        const curr = candles[i];
+        return prev.close < prev.open && curr.close > curr.open && curr.open < prev.close && curr.close > prev.open;
+      };
+
+      const isBearishEngulfing = (i) => {
+        if (i < 1) return false;
+        const prev = candles[i - 1];
+        const curr = candles[i];
+        return prev.close > prev.open && curr.close < curr.open && curr.open > prev.close && curr.close < prev.open;
+      };
+
+      const isHammer = (i) => {
+        const c = candles[i];
+        const body = Math.abs(c.close - c.open);
+        const lowerShadow = c.open > c.close ? c.open - c.low : c.close - c.low;
+        const upperShadow = c.high - (c.open > c.close ? c.close : c.open);
+        return lowerShadow > 2 * body && upperShadow < body;
+      };
+
+      const isShootingStar = (i) => {
+        const c = candles[i];
+        const body = Math.abs(c.close - c.open);
+        const upperShadow = c.high - (c.open > c.close ? c.open : c.close);
+        const lowerShadow = c.open > c.close ? c.close - c.low : c.open - c.low;
+        return upperShadow > 2 * body && lowerShadow < body;
+      };
+
+      const isDoji = (i) => {
+        const c = candles[i];
+        return Math.abs(c.close - c.open) <= (c.high - c.low) * 0.1;
+      };
+
+      const isMorningStar = (i) => {
+        if (i < 2) return false;
+        const c1 = candles[i - 2], c2 = candles[i - 1], c3 = candles[i];
+        const isBearish = c1.close < c1.open;
+        const isSmallBody = Math.abs(c2.close - c2.open) <= (c2.high - c2.low) * 0.3;
+        const isBullish = c3.close > c3.open;
+        return isBearish && isSmallBody && isBullish && c3.close > c1.open;
+      };
+
+      const isEveningStar = (i) => {
+        if (i < 2) return false;
+        const c1 = candles[i - 2], c2 = candles[i - 1], c3 = candles[i];
+        const isBullish = c1.close > c1.open;
+        const isSmallBody = Math.abs(c2.close - c2.open) <= (c2.high - c2.low) * 0.3;
+        const isBearish = c3.close < c3.open;
+        return isBullish && isSmallBody && isBearish && c3.close < c1.open;
+      };
+
+      for (let i = len - 1; i >= Math.max(0, len - 20); i--) {
+        if (isBullishEngulfing(i)) patterns.push({ type: 'Bullish Engulfing', index: i });
+        if (isBearishEngulfing(i)) patterns.push({ type: 'Bearish Engulfing', index: i });
+        if (isHammer(i)) patterns.push({ type: 'Hammer', index: i });
+        if (isShootingStar(i)) patterns.push({ type: 'Shooting Star', index: i });
+        if (isDoji(i)) patterns.push({ type: 'Doji', index: i });
+        if (isMorningStar(i)) patterns.push({ type: 'Morning Star', index: i });
+        if (isEveningStar(i)) patterns.push({ type: 'Evening Star', index: i });
+      }
+
+      return patterns;
+    };
+
+    // ========== SYNAPTIC INTELLIGENCE ENGINE (SIE) ==========
+    const runSynapticIntelligenceEngine = (indicators, patterns, price, sensitivity) => {
+      let score = 0.5;
+      const drivers = [];
+
+      const rsi = indicators.rsi[indicators.rsi.length - 1];
+      const bb = indicators.bollinger;
+      const inLowerBB = bb.lower.length > 0 && price <= bb.lower[bb.lower.length - 1];
+      const inUpperBB = bb.upper.length > 0 && price >= bb.upper[bb.upper.length - 1];
+
+      // Pattern-based logic
+      const recentPatterns = patterns.filter(p => p.index >= patterns[0]?.index - 2);
+      const hasBullishEngulfing = recentPatterns.some(p => p.type === 'Bullish Engulfing');
+      const hasBearishEngulfing = recentPatterns.some(p => p.type === 'Bearish Engulfing');
+      const hasHammer = recentPatterns.some(p => p.type === 'Hammer');
+      const hasShootingStar = recentPatterns.some(p => p.type === 'Shooting Star');
+      const hasMorningStar = recentPatterns.some(p => p.type === 'Morning Star');
+      const hasEveningStar = recentPatterns.some(p => p.type === 'Evening Star');
+
+      // Adjust thresholds based on sensitivity
+      const oversoldThreshold = 30 + (100 - sensitivity) * 0.2;
+      const overboughtThreshold = 70 - (100 - sensitivity) * 0.2;
+
+      // Bullish conditions
+      if (rsi !== undefined && rsi < oversoldThreshold) {
+        if (hasBullishEngulfing && inLowerBB) {
+          score += 0.4;
+          drivers.push('Bullish Engulfing + Oversold RSI + Lower BB');
+        } else if (hasBullishEngulfing) {
+          score += 0.3;
+          drivers.push('Bullish Engulfing + Oversold RSI');
+        } else if (inLowerBB && hasHammer) {
+          score += 0.35;
+          drivers.push('Hammer + Lower BB + Oversold RSI');
+        } else if (inLowerBB) {
+          score += 0.25;
+          drivers.push('Lower BB + Oversold RSI');
+        } else {
+          score += 0.15;
+          drivers.push('Oversold RSI');
+        }
+      }
+
+      // Bearish conditions
+      if (rsi !== undefined && rsi > overboughtThreshold) {
+        if (hasBearishEngulfing && inUpperBB) {
+          score -= 0.4;
+          drivers.push('Bearish Engulfing + Overbought RSI + Upper BB');
+        } else if (hasBearishEngulfing) {
+          score -= 0.3;
+          drivers.push('Bearish Engulfing + Overbought RSI');
+        } else if (inUpperBB && hasShootingStar) {
+          score -= 0.35;
+          drivers.push('Shooting Star + Upper BB + Overbought RSI');
+        } else if (inUpperBB) {
+          score -= 0.25;
+          drivers.push('Upper BB + Overbought RSI');
+        } else {
+          score -= 0.15;
+          drivers.push('Overbought RSI');
+        }
+      }
+
+      // Star patterns
+      if (hasMorningStar) {
+        score += 0.45;
+        drivers.push('Morning Star Pattern');
+      }
+      if (hasEveningStar) {
+        score -= 0.45;
+        drivers.push('Evening Star Pattern');
+      }
+
+      // Clamp score
+      score = Math.max(0, Math.min(1, score));
+
+      // Volatility estimation
+      const prices = indicators.bollinger.middle;
+      let volatility = 'Low';
+      if (prices.length > 10) {
+        const returns = prices.slice(1).map((p, i) => (p - prices[i]) / prices[i]);
+        const std = Math.sqrt(returns.reduce((sum, r) => sum + r * r, 0) / returns.length);
+        volatility = std > 0.005 ? 'High' : std > 0.002 ? 'Medium' : 'Low';
+      }
+
+      return {
+        confidence: score,
+        signal: score >= 0.75 ? 'BUY STRONG' :
+               score >= 0.55 ? 'BUY' :
+               score <= 0.25 ? 'SELL STRONG' :
+               score <= 0.45 ? 'SELL' : 'NEUTRAL',
+        drivers: drivers.join(', ') || 'Market Noise',
+        volatility
+      };
+    };
+
+    // ========== DATA FETCHING ==========
+    const fetchMarketData = async (symbol = 'XAU/USD', interval = '5min') => {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=100&apikey=${TWELVE_DATA_API_KEY}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      const data = await res.json();
+      if (data.status === 'error') throw new Error(data.message);
+
+      const candles = data.values.map(v => ({
+        time: Math.floor(new Date(v.datetime).getTime() / 1000),
+        open: parseFloat(v.open),
+        high: parseFloat(v.high),
+        low: parseFloat(v.low),
+        close: parseFloat(v.close)
+      })).reverse();
+
+      return {
+        candles,
+        latestPrice: candles.length ? candles[candles.length - 1].close : null
+      };
+    };
+
+    // ========== MAIN COMPONENTS ==========
+    const Header = () => {
+      const { state } = useContext(OracleContext);
+      return (
+        <header className="p-4 border-b border-gray-700">
+          <h1 className="text-2xl font-bold text-cyan-400">Neural Trading Oracle - XAU/USD</h1>
+          <div className="text-sm text-gray-400 mt-1">
+            Status: <span className={state.connectionStatus === 'Connected' ? 'text-green-400' : state.connectionStatus.includes('Reconnect') ? 'text-yellow-400' : 'text-red-400'}>
+              {state.connectionStatus}
+            </span>
+          </div>
+        </header>
+      );
+    };
+
+    const ControlPanel = () => {
+      const { state, dispatch } = useContext(OracleContext);
+
+      const toggleOracle = () => {
+        dispatch({ type: 'SET_ORACLE_ACTIVE', payload: !state.isOracleActive });
+      };
+
+      const setTimeframe = (e) => {
+        dispatch({ type: 'SET_TIMEFRAME', payload: e.target.value });
+      };
+
+      const setSensitivity = (e) => {
+        dispatch({ type: 'SET_SENSITIVITY', payload: parseInt(e.target.value) });
+      };
+
+      return (
+        <div className="p-4 bg-gray-800 rounded-lg mb-4">
+          <div className="flex flex-wrap gap-4 items-center">
+            <button
+              onClick={toggleOracle}
+              className={`px-4 py-2 rounded font-medium ${
+                state.isOracleActive
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              {state.isOracleActive ? 'Pause Oracle' : 'Activate Oracle'}
+            </button>
+
+            <div>
+              <label className="text-sm text-gray-300 mr-2">Timeframe:</label>
+              <select
+                value={state.timeframe}
+                onChange={setTimeframe}
+                className="bg-gray-700 text-white rounded px-2 py-1"
+              >
+                <option value="1min">M1</option>
+                <option value="5min">M5</option>
+                <option value="15min">M15</option>
+                <option value="1h">H1</option>
+              </select>
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-sm text-gray-300 block mb-1">
+                Sensitivity: {state.sensitivity}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={state.sensitivity}
+                onChange={setSensitivity}
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const SignalPanel = () => {
+      const { state } = useContext(OracleContext);
+
+      let signalClass = 'text-gray-400 bg-gray-800';
+      let pulseClass = '';
+      let signalText = state.lastSignal || 'AWAITING SIGNAL';
+
+      if (state.lastSignal === 'BUY STRONG') {
+        signalClass = 'text-green-400 bg-green-900/30';
+        pulseClass = 'pulse';
+      } else if (state.lastSignal === 'SELL STRONG') {
+        signalClass = 'text-red-400 bg-red-900/30';
+        pulseClass = 'pulse-sell';
+      } else if (state.lastSignal === 'BUY') {
+        signalClass = 'text-green-300 bg-green-900/20';
+      } else if (state.lastSignal === 'SELL') {
+        signalClass = 'text-red-300 bg-red-900/20';
+      } else if (state.lastSignal === 'NEUTRAL') {
+        signalClass = 'text-gray-300 bg-gray-800';
+      }
+
+      return (
+        <div className={`p-6 rounded-xl mb-4 font-bold text-center ${signalClass} ${pulseClass}`}>
+          <div className="text-2xl">{signalText}</div>
+          <div className="text-sm mt-2 opacity-80">
+            Confidence: {(state.confidenceScore * 100).toFixed(1)}% • {new Date().toLocaleTimeString()}
+          </div>
+          {state.primaryDrivers && (
+            <div className="text-xs mt-2 opacity-70 max-w-md mx-auto truncate">
+              {state.primaryDrivers}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const ChartPanel = () => {
+      const { state } = useContext(OracleContext);
+      const chartContainerRef = useRef(null);
+      const chartRef = useRef(null);
+      const candleSeriesRef = useRef(null);
+      const bbSeriesRef = useRef(null);
+      const rsiSeriesRef = useRef(null);
+      const macdSeriesRef = useRef(null);
+      const rsiChartRef = useRef(null);
+      const macdChartRef = useRef(null);
+
+      useEffect(() => {
+        if (!chartContainerRef.current || state.candles.length === 0) return;
+
+        // Main Chart
+        if (!chartRef.current) {
+          chartRef.current = LightweightCharts.createChart(chartContainerRef.current, {
+            width: chartContainerRef.current.clientWidth,
+            height: 400,
+            layout: { backgroundColor: '#0f172a', textColor: '#e2e8f0' },
+            grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+            rightPriceScale: { borderColor: '#334155' },
+            timeScale: { borderColor: '#334155', timeVisible: true, secondsVisible: false }
+          });
+
+          candleSeriesRef.current = chartRef.current.addCandlestickSeries({
+            upColor: '#10b981',
+            downColor: '#ef4444',
+            borderVisible: false,
+            wickUpColor: '#10b981',
+            wickDownColor: '#ef4444'
+          });
+
+          bbSeriesRef.current = chartRef.current.addBandSeries({
+            topColor: 'rgba(99, 102, 241, 0.2)',
+            bottomColor: 'rgba(99, 102, 241, 0.2)',
+            lineColor: 'rgba(99, 102, 241, 0)',
+            lineWidth: 0
+          });
+        }
+
+        // Update main chart data
+        candleSeriesRef.current.setData(state.candles);
+        if (state.indicators.bollinger.upper.length > 0) {
+          const bbData = state.candles.slice(-state.indicators.bollinger.upper.length).map((c, i) => ({
+            time: c.time,
+            top: state.indicators.bollinger.upper[i],
+            bottom: state.indicators.bollinger.lower[i]
+          }));
+          bbSeriesRef.current.setData(bbData);
+        }
+
+        // Add pattern markers
+        chartRef.current.subscribeClick(() => {}); // dummy to enable markers
+        state.detectedPatterns.forEach(pattern => {
+          const candle = state.candles[pattern.index];
+          if (candle) {
+            chartRef.current.setMarkers([
+              { time: candle.time, position: 'belowBar', shape: 'circle', color: '#f59e0b', text: pattern.type }
+            ]);
+          }
+        });
+
+        // RSI Chart
+        if (!rsiChartRef.current) {
+          const rsiContainer = document.createElement('div');
+          rsiContainer.style.height = '150px';
+          chartContainerRef.current.parentNode.appendChild(rsiContainer);
+          rsiChartRef.current = LightweightCharts.createChart(rsiContainer, {
+            height: 150,
+            layout: { backgroundColor: '#0f172a', textColor: '#e2e8f0' },
+            grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
+            rightPriceScale: { borderColor: '#334155', visible: false },
+            timeScale: { visible: false }
+          });
+
+          rsiSeriesRef.current = rsiChartRef.current.addLineSeries({ color: '#8b5cf6' });
+          rsiChartRef.current.createPriceLine({ price: 70, color: '#ef4444', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed });
+          rsiChartRef.current.createPriceLine({ price: 30, color: '#10b981', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed });
+        }
+
+        if (state.indicators.rsi.length > 0) {
+          const rsiData = state.candles.slice(-state.indicators.rsi.length).map((c, i) => ({
+            time: c.time,
+            value: state.indicators.rsi[i]
+          })).filter(d => d.value !== null);
+          rsiSeriesRef.current.setData(rsiData);
+        }
+
+        // MACD Chart
+        if (!macdChartRef.current) {
+          const macdContainer = document.createElement('div');
+          macdContainer.style.height = '150px';
+          chartContainerRef.current.parentNode.appendChild(macdContainer);
+          macdChartRef.current = LightweightCharts.createChart(macdContainer, {
+            height: 150,
+            layout: { backgroundColor: '#0f172a', textColor: '#e2e8f0' },
+            grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
+            rightPriceScale: { borderColor: '#334155', visible: false },
+            timeScale: { visible: false }
+          });
+
+          macdSeriesRef.current = {
+            macd: macdChartRef.current.addLineSeries({ color: '#3b82f6' }),
+            signal: macdChartRef.current.addLineSeries({ color: '#ef4444' }),
+            histogram: macdChartRef.current.addHistogramSeries({ color: '#10b981', negativeColor: '#ef4444' })
+          };
+        }
+
+        const macd = state.indicators.macd;
+        if (macd.macd.length > 0) {
+          const macdData = state.candles.slice(-macd.macd.length).map((c, i) => ({
+            time: c.time,
+            value: macd.macd[i]
+          }));
+          const signalData = state.candles.slice(-macd.signal.length).map((c, i) => ({
+            time: c.time,
+            value: macd.signal[i]
+          }));
+          const histData = state.candles.slice(-macd.histogram.length).map((c, i) => ({
+            time: c.time,
+            value: macd.histogram[i],
+            color: macd.histogram[i] >= 0 ? '#10b981' : '#ef4444'
+          }));
+
+          macdSeriesRef.current.macd.setData(macdData);
+          macdSeriesRef.current.signal.setData(signalData);
+          macdSeriesRef.current.histogram.setData(histData);
+        }
+
+        const handleResize = () => {
+          if (chartRef.current) {
+            chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
+          }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, [state.candles, state.indicators, state.detectedPatterns]);
+
+      return <div ref={chartContainerRef} className="w-full rounded-lg overflow-hidden bg-gray-800"></div>;
+    };
+
+    const LogPanel = () => {
+      const { state } = useContext(OracleContext);
+
+      return (
+        <div className="mt-6 bg-gray-800 rounded-lg overflow-hidden">
+          <div className="p-3 bg-gray-900 font-medium">Signal Audit Trail</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th className="p-2 text-left">Timestamp</th>
+                  <th className="p-2 text-left">Signal</th>
+                  <th className="p-2 text-left">Confidence</th>
+                  <th className="p-2 text-left">Price</th>
+                  <th className="p-2 text-left">Drivers</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.signalHistory.length === 0 ? (
+                  <tr><td colSpan="5" className="p-4 text-center text-gray-500">No signals yet</td></tr>
+                ) : (
+                  state.signalHistory.map((log, i) => (
+                    <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                      <td className="p-2">{new Date(log.timestamp).toLocaleTimeString()}</td>
+                      <td className={`p-2 font-medium ${
+                        log.signal.includes('BUY') ? 'text-green-400' :
+                        log.signal.includes('SELL') ? 'text-red-400' : 'text-gray-400'
+                      }`}>
+                        {log.signal}
+                      </td>
+                      <td className="p-2">{(log.confidence * 100).toFixed(1)}%</td>
+                      <td className="p-2">{log.price?.toFixed(2) || 'N/A'}</td>
+                      <td className="p-2 max-w-xs truncate">{log.drivers}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
+    const BrainPanel = () => {
+      const { state } = useContext(OracleContext);
+
+      let volatilityColor = 'text-gray-400';
+      if (state.volatility === 'High') volatilityColor = 'text-red-400';
+      else if (state.volatility === 'Medium') volatilityColor = 'text-yellow-400';
+
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="text-sm text-gray-400">Confidence Score</div>
+            <div className="text-2xl font-bold mt-1">{(state.confidenceScore * 100).toFixed(1)}%</div>
+          </div>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="text-sm text-gray-400">Primary Drivers</div>
+            <div className="text-sm mt-1 truncate">{state.primaryDrivers || '—'}</div>
+          </div>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="text-sm text-gray-400">Market Volatility</div>
+            <div className={`text-lg font-bold mt-1 ${volatilityColor}`}>{state.volatility}</div>
+          </div>
+        </div>
+      );
+    };
+
+    const OracleApp = () => {
+      const [state, dispatch] = useReducer(oracleReducer, initialState);
+      const intervalRef = useRef(null);
+      const retryCountRef = useRef(0);
+      const MAX_RETRIES = 3;
+
+      const fetchDataAndAnalyze = async () => {
+        if (!state.isOracleActive) return;
+
+        try {
+          dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'Connected' });
+          const marketData = await fetchMarketData('XAU/USD', state.timeframe);
+          dispatch({ type: 'UPDATE_MARKET_DATA', payload: marketData });
+
+          const prices = marketData.candles.map(c => c.close);
+          const rsi = calculateRSI(prices);
+          const macd = calculateMACD(prices);
+          const bollinger = calculateBollingerBands(prices);
+
+          dispatch({
+            type: 'UPDATE_INDICATORS',
+            payload: { rsi, macd, bollinger }
+          });
+
+          const patterns = detectCandlestickPatterns(marketData.candles);
+          dispatch({ type: 'UPDATE_PATTERNS', payload: patterns });
+
+          const sieResult = runSynapticIntelligenceEngine(
+            { rsi, macd, bollinger },
+            patterns,
+            marketData.latestPrice,
+            state.sensitivity
+          );
+
+          dispatch({ type: 'GENERATE_SIGNAL', payload: sieResult });
+          retryCountRef.current = 0;
+        } catch (error) {
+          console.error('Data fetch error:', error);
+          retryCountRef.current++;
+          if (retryCountRef.current <= MAX_RETRIES) {
+            dispatch({ type: 'SET_CONNECTION_STATUS', payload: `Reconnecting... (${retryCountRef.current}/${MAX_RETRIES})` });
+          } else {
+            dispatch({ type: 'SET_CONNECTION_STATUS', payload: 'Disconnected' });
+          }
+        }
+      };
+
+      useEffect(() => {
+        fetchDataAndAnalyze();
+        intervalRef.current = setInterval(fetchDataAndAnalyze, 15000); // 15s base
+        return () => clearInterval(intervalRef.current);
+      }, [state.isOracleActive, state.timeframe, state.sensitivity]);
+
+      return (
+        <OracleContext.Provider value={{ state, dispatch }}>
+          <div className="max-w-7xl mx-auto p-4">
+            <Header />
+            <ControlPanel />
+            <SignalPanel />
+            <BrainPanel />
+            <ChartPanel />
+            <LogPanel />
+          </div>
+        </OracleContext.Provider>
+      );
+    };
+
+    const Root = () => (
+      <div className="min-h-screen bg-gray-900">
+        <OracleApp />
+      </div>
+    );
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Root />);
+  </script>
+</body>
+</html>
