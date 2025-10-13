@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XAU/USD CFD Analyzer - Real Market Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #f59e0b;
+            --text: #f1f5f9;
+            --card-bg: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .glass-morphism {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-container {
+            height: calc(100vh - 240px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--secondary);
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        .message {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-radius: 18px;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .price-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .price-card:hover::before {
+            left: 100%;
+        }
+        
+        .price-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+            }
+        }
+        
+        .markdown-content {
+            line-height: 1.6;
+        }
+        
+        .markdown-content h1 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin: 1rem 0; 
+            color: var(--accent);
+        }
+        .markdown-content h2 { 
+            font-size: 1.3rem; 
+            font-weight: 600; 
+            margin: 0.8rem 0; 
+            color: var(--text);
+        }
+        .markdown-content h3 { 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin: 0.6rem 0; 
+        }
+        .markdown-content p { 
+            margin: 0.5rem 0; 
+        }
+        .markdown-content ul { 
+            list-style-type: disc; 
+            margin-left: 1.5rem; 
+            margin: 0.5rem 0; 
+        }
+        .markdown-content ol { 
+            list-style-type: decimal; 
+            margin-left: 1.5rem; 
+            margin: 0.5rem 0; 
+        }
+        .markdown-content li { 
+            margin: 0.3rem 0; 
+        }
+        .markdown-content code { 
+            background: rgba(245, 158, 11, 0.2); 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-family: 'Courier New', monospace;
+        }
+        .markdown-content pre { 
+            background: rgba(15, 23, 42, 0.5); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            margin: 0.5rem 0; 
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .markdown-content strong { 
+            font-weight: 600; 
+            color: var(--accent);
+        }
+        .markdown-content em { 
+            font-style: italic; 
+        }
+        
+        .signal-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .signal-buy { 
+            background: rgba(16, 185, 129, 0.2); 
+            color: var(--success); 
+            border: 1px solid var(--success);
+        }
+        .signal-sell { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: var(--danger); 
+            border: 1px solid var(--danger);
+        }
+        .signal-hold { 
+            background: rgba(245, 158, 11, 0.2); 
+            color: var(--warning); 
+            border: 1px solid var(--warning);
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(245, 158, 11, 0.2);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .status-online {
+            background: var(--success);
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Header -->
+        <header class="glass-morphism p-5 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">XAU/USD CFD Analyzer</h1>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <span class="status-indicator status-online"></span>
+                            <span>Real Market Data • Twelve Data API</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400">Last Update</p>
+                        <p class="text-sm font-semibold" id="lastUpdate">--:--:--</p>
+                    </div>
+                    <button id="refreshBtn" class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh Data</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Price Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="price-card glass-morphism p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-400">Current Price</p>
+                        <p class="text-2xl font-bold" id="currentPrice">Loading...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <i class="fas fa-coins text-amber-500"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-sm" id="priceChange">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </span>
+                </div>
+            </div>
+            
+            <div class="price-card glass-morphism p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-400">24h High</p>
+                        <p class="text-xl font-bold" id="high24h">Loading...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-green-500"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="price-card glass-morphism p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-400">24h Low</p>
+                        <p class="text-xl font-bold" id="low24h">Loading...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-red-500"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="price-card glass-morphism p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-400">Volume</p>
+                        <p class="text-xl font-bold" id="volume">Loading...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-blue-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Chart Section -->
+            <div class="lg:col-span-2">
+                <div class="glass-morphism p-4 h-96">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">Price Chart</h2>
+                        <div class="flex space-x-2">
+                            <button class="chart-timeframe btn-secondary px-3 py-1 text-xs rounded" data-timeframe="1min">1M</button>
+                            <button class="chart-timeframe btn-secondary px-3 py-1 text-xs rounded" data-timeframe="5min">5M</button>
+                            <button class="chart-timeframe btn-secondary px-3 py-1 text-xs rounded" data-timeframe="15min">15M</button>
+                            <button class="chart-timeframe btn-secondary px-3 py-1 text-xs rounded" data-timeframe="1h">1H</button>
+                            <button class="chart-timeframe btn-secondary px-3 py-1 text-xs rounded" data-timeframe="1day">1D</button>
+                        </div>
+                    </div>
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Analysis -->
+            <div class="glass-morphism p-4">
+                <h2 class="text-lg font-semibold mb-4">Market Overview</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <span class="text-sm">RSI (14)</span>
+                        <span class="font-bold" id="rsiValue">-</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <span class="text-sm">MACD</span>
+                        <span class="font-bold" id="macdValue">-</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <span class="text-sm">Support</span>
+                        <span class="font-bold" id="supportLevel">-</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <span class="text-sm">Resistance</span>
+                        <span class="font-bold" id="resistanceLevel">-</span>
+                    </div>
+                    <div class="mt-4 p-3 bg-slate-800/50 rounded-lg">
+                        <p class="text-xs text-gray-400 mb-2">AI Signal</p>
+                        <span class="signal-badge signal-hold" id="aiSignal">HOLD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="glass-morphism mt-6 p-4">
+            <div class="chat-container" id="chatContainer">
+                <div class="message mb-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 flex items-center justify-center">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold mb-1">AI Assistant</p>
+                            <div class="bg-slate-800/50 rounded-lg p-3 markdown-content">
+                                <p>👋 Selamat datang di <strong>XAU/USD CFD Analyzer</strong> dengan data real dari Twelve Data!</p>
+                                <p>Saya siap membantu Anda dengan analisis trading berdasarkan data pasar aktual. Klik tombol <strong>"Refresh Data"</strong> untuk mendapatkan data terkini, lalu ajukan pertanyaan Anda.</p>
+                                <p>Contoh pertanyaan:</p>
+                                <ul>
+                                    <li>📊 Analisis teknikal berdasarkan data terbaru</li>
+                                    <li>📈 Prediksi pergerakan harga untuk 1 jam ke depan</li>
+                                    <li>🎯 Level support & resistance kunci saat ini</li>
+                                    <li>💡 Strategi trading yang sesuai dengan kondisi pasar</li>
+                                    <li>📉 Apakah saat ini waktu yang baik untuk buy/sell?</li>
+                                </ul>
+                                <p><em>Data akan diperbarui saat Anda menekan tombol Refresh atau mengajukan pertanyaan analisis.</em></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="mt-4 flex items-center space-x-3">
+                <div class="flex-1 relative">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Tanyakan analisis XAU/USD berdasarkan data real..."
+                        class="w-full bg-slate-800/50 rounded-full px-5 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-amber-500 border border-slate-700"
+                    >
+                    <button id="voiceBtn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-amber-500 transition-colors">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <button id="sendBtn" class="btn-primary rounded-full px-6 py-3 flex items-center space-x-2">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Analyze</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GEMINI_API_KEY = "AIzaSyDppruhfX-r3GqpTUV_kyr1u0cXZ8aFVjU";
+        const TWELVE_DATA_API_KEY = "546a5c7b6baf4f219ca8ae0e181730d5";
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+        
+        // Initialize markdown parser
+        const md = window.markdownit();
+        
+        // Global variables
+        let currentData = null;
+        let chart = null;
+        let currentTimeframe = '1min';
+        
+        // Chart setup
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        
+        function initChart() {
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'XAU/USD',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#475569',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: $${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                maxRotation: 0
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fetch real data from Twelve Data API
+        async function fetchRealData() {
+            try {
+                // Fetch current price and quote
+                const quoteResponse = await fetch(`https://api.twelvedata.com/quote?symbol=XAU/USD&apikey=${TWELVE_DATA_API_KEY}`);
+                const quoteData = await quoteResponse.json();
+                
+                if (quoteData.status !== 'OK') {
+                    throw new Error(quoteData.message || 'Failed to fetch quote data');
+                }
+                
+                // Fetch time series data
+                const tsResponse = await fetch(`https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=${currentTimeframe}&outputsize=30&apikey=${TWELVE_DATA_API_KEY}`);
+                const tsData = await tsResponse.json();
+                
+                if (tsData.status !== 'OK') {
+                    throw new Error(tsData.message || 'Failed to fetch time series data');
+                }
+                
+                // Fetch technical indicators
+                const indicatorsResponse = await fetch(`https://api.twelvedata.com/multiple_indicators?symbols=XAU/USD&interval=${currentTimeframe}&indicators=rsi,macd,sma,ema&apikey=${TWELVE_DATA_API_KEY}`);
+                const indicatorsData = await indicatorsResponse.json();
+                
+                return {
+                    quote: quoteData,
+                    timeSeries: tsData.values.reverse(),
+                    indicators: indicatorsData
+                };
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                throw error;
+            }
+        }
+        
+        // Update UI with real data
+        function updateUI(data) {
+            const { quote, timeSeries, indicators } = data;
+            
+            // Update price cards
+            const currentPrice = parseFloat(quote.close);
+            const previousClose = parseFloat(quote.previous_close);
+            const change = currentPrice - previousClose;
+            const changePercent = (change / previousClose * 100).toFixed(2);
+            
+            document.getElementById('currentPrice').textContent = `$${currentPrice.toFixed(2)}`;
+            document.getElementById('priceChange').innerHTML = `
+                <i class="fas fa-arrow-${change >= 0 ? 'up text-green-500' : 'down text-red-500'}"></i> 
+                ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent}%)
+            `;
+            document.getElementById('high24h').textContent = `$${parseFloat(quote.high).toFixed(2)}`;
+            document.getElementById('low24h').textContent = `$${parseFloat(quote.low).toFixed(2)}`;
+            document.getElementById('volume').textContent = quote.volume ? 
+                (parseFloat(quote.volume) > 1000000 ? `${(parseFloat(quote.volume) / 1000000).toFixed(1)}M` : 
+                 parseFloat(quote.volume) > 1000 ? `${(parseFloat(quote.volume) / 1000).toFixed(1)}K` : 
+                 parseFloat(quote.volume).toFixed(0)) : 'N/A';
+            
+            // Update technical indicators
+            if (indicators && indicators.values && indicators.values.length > 0) {
+                const latestIndicator = indicators.values[indicators.values.length - 1];
+                
+                // RSI
+                if (latestIndicator.rsi) {
+                    const rsi = parseFloat(latestIndicator.rsi);
+                    document.getElementById('rsiValue').textContent = rsi.toFixed(2);
+                    document.getElementById('rsiValue').className = `font-bold ${rsi > 70 ? 'text-red-500' : rsi < 30 ? 'text-green-500' : 'text-yellow-500'}`;
+                }
+                
+                // MACD
+                if (latestIndicator.macd && latestIndicator.macd_signal) {
+                    const macd = parseFloat(latestIndicator.macd);
+                    const macdSignal = parseFloat(latestIndicator.macd_signal);
+                    const macdHist = parseFloat(latestIndicator.macd_hist);
+                    
+                    document.getElementById('macdValue').textContent = macd > macdSignal ? 'Bullish' : 'Bearish';
+                    document.getElementById('macdValue').className = `font-bold ${macd > macdSignal ? 'text-green-500' : 'text-red-500'}`;
+                }
+                
+                // Support and Resistance (using SMA)
+                if (latestIndicator.sma) {
+                    const sma = parseFloat(latestIndicator.sma);
+                    document.getElementById('supportLevel').textContent = `$${(currentPrice - 10).toFixed(2)}`;
+                    document.getElementById('resistanceLevel').textContent = `$${(currentPrice + 10).toFixed(2)}`;
+                }
+            }
+            
+            // Update AI Signal based on indicators
+            updateAISignal(indicators);
+            
+            // Update chart
+            updateChart(timeSeries);
+            
+            // Update last update time
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+            
+            // Store current data for analysis
+            currentData = data;
+        }
+        
+        // Update AI Signal
+        function updateAISignal(indicators) {
+            if (!indicators || !indicators.values || indicators.values.length === 0) {
+                document.getElementById('aiSignal').textContent = 'HOLD';
+                document.getElementById('aiSignal').className = 'signal-badge signal-hold';
+                return;
+            }
+            
+            const latestIndicator = indicators.values[indicators.values.length - 1];
+            let signal = 'HOLD';
+            let signalClass = 'signal-hold';
+            
+            if (latestIndicator.rsi && latestIndicator.macd && latestIndicator.macd_signal) {
+                const rsi = parseFloat(latestIndicator.rsi);
+                const macd = parseFloat(latestIndicator.macd);
+                const macdSignal = parseFloat(latestIndicator.macd_signal);
+                
+                if (rsi < 30 && macd > macdSignal) {
+                    signal = 'BUY';
+                    signalClass = 'signal-buy';
+                } else if (rsi > 70 && macd < macdSignal) {
+                    signal = 'SELL';
+                    signalClass = 'signal-sell';
+                }
+            }
+            
+            document.getElementById('aiSignal').textContent = signal;
+            document.getElementById('aiSignal').className = `signal-badge ${signalClass}`;
+        }
+        
+        // Update chart with time series data
+        function updateChart(timeSeries) {
+            if (!chart) {
+                initChart();
+            }
+            
+            const labels = [];
+            const data = [];
+            
+            timeSeries.forEach(item => {
+                labels.push(new Date(item.datetime).toLocaleTimeString('id-ID', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+                data.push(parseFloat(item.close));
+            });
+            
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+        
+        // Call Gemini API for analysis
+        async function callGeminiAPI(prompt) {
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `Kamu adalah ahli trading XAU/USD CFD profesional. Berikan analisis yang akurat dan mendalam berdasarkan data real-time yang diberikan. Jawab dalam bahasa Indonesia dengan format yang mudah dibaca. Gunakan markdown untuk formatting. 
+
+Data pasar terkini:
+- Harga saat ini: $${currentData.quote.close}
+- Perubahan: ${((parseFloat(currentData.quote.close) - parseFloat(currentData.quote.previous_close)) / parseFloat(currentData.quote.previous_close) * 100).toFixed(2)}%
+- High 24h: $${currentData.quote.high}
+- Low 24h: $${currentData.quote.low}
+- Volume: ${currentData.quote.volume}
+
+Indikator teknikal:
+- RSI: ${currentData.indicators.values[currentData.indicators.values.length - 1].rsi}
+- MACD: ${currentData.indicators.values[currentData.indicators.values.length - 1].macd}
+- MACD Signal: ${currentData.indicators.values[currentData.indicators.values.length - 1].macd_signal}
+
+Pertanyaan: ${prompt}`
+                            }]
+                        }]
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.candidates && data.candidates[0]) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+                throw new Error('Invalid response from API');
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                return 'Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.';
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message mb-4';
+            
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-3 justify-end">
+                        <div class="flex-1 text-right">
+                            <p class="text-sm font-semibold mb-1">You</p>
+                            <div class="bg-amber-500 text-slate-900 rounded-lg p-3 inline-block max-w-xs">
+                                <p>${content}</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 flex items-center justify-center">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold mb-1">AI Assistant</p>
+                            <div class="bg-slate-800/50 rounded-lg p-3 markdown-content max-w-3xl">
+                                ${md.render(content)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            const chatContainer = document.getElementById('chatContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message mb-4';
+            typingDiv.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 flex items-center justify-center">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Handle message sending
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, true);
+            input.value = '';
+            showTypingIndicator();
+            
+            // Fetch fresh data before analysis
+            try {
+                const data = await fetchRealData();
+                currentData = data;
+                updateUI(data);
+                
+                const response = await callGeminiAPI(message);
+                removeTypingIndicator();
+                addMessage(response);
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`Error: ${error.message}. Mohon periksa koneksi internet atau coba refresh data.`);
+            }
+        }
+        
+        // Handle data refresh
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const originalContent = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<div class="loading-spinner inline-block mr-2"></div> Loading...';
+            refreshBtn.disabled = true;
+            
+            try {
+                const data = await fetchRealData();
+                currentData = data;
+                updateUI(data);
+                
+                addMessage('✅ Data berhasil diperbarui dengan data real dari Twelve Data API. Sekarang Anda bisa meminta analisis berdasarkan data terkini.');
+            } catch (error) {
+                addMessage(`❌ Gagal memperbarui data: ${error.message}. Mohon periksa koneksi internet atau API key.`);
+            } finally {
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        document.getElementById('refreshBtn').addEventListener('click', refreshData);
+        
+        // Chart timeframe buttons
+        document.querySelectorAll('.chart-timeframe').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.chart-timeframe').forEach(b => {
+                    b.classList.remove('bg-amber-500', 'text-slate-900');
+                    b.classList.add('btn-secondary');
+                });
+                e.target.classList.add('bg-amber-500', 'text-slate-900');
+                e.target.classList.remove('btn-secondary');
+                
+                currentTimeframe = e.target.dataset.timeframe;
+                refreshData();
+            });
+        });
+        
+        // Voice input (placeholder)
+        document.getElementById('voiceBtn').addEventListener('click', () => {
+            alert('Fitur voice input akan segera tersedia!');
+        });
+        
+        // Initialize
+        initChart();
+        
+        // Initial data load
+        window.addEventListener('load', () => {
+            refreshData();
+        });
+    </script>
+</body>
+</html>
