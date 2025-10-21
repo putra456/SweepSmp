@@ -1,0 +1,375 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { initializeApp } from 'firebase/app';
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    GoogleAuthProvider, 
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut
+} from 'firebase/auth';
+
+// --- KONFIGURASI PENTING ---
+const firebaseConfig = {
+    apiKey: "AIzaSyCx8eKTTDPzEjbmcCaQOop5zhgtzS6-5mM",
+    authDomain: "vercel-ce99e.firebaseapp.com",
+    projectId: "vercel-ce99e",
+    storageBucket: "vercel-ce99e.appspot.com",
+    messagingSenderId: "1077496685101",
+    appId: "1:1077496685101:web:7dba4a28eaf78c74e5cea4",
+};
+
+// !!! PERINGATAN KEAMANAN !!!
+// MENYIMPAN TOKEN API DI KODE FRONTEND SANGAT BERISIKO.
+// Siapa pun dapat melihat token ini dengan membuka Developer Tools di browser.
+// Untuk aplikasi sungguhan, gunakan backend (seperti Express.js) untuk menyimpan token ini dengan aman.
+const VERCEL_TOKEN = '7pnM52ywCbquEnhzRfvNNL3z'; 
+const SUPER_USER_EMAIL = 'akusky2298@gmail.com';
+const SUPER_USER_PASS = 'gatauah123';
+const VERCEL_API_BASE = 'https://api.vercel.com';
+// ----------------------------
+
+
+// --- KOMPONEN IKON (SVG Internal) ---
+const Icon = ({ name, className = '' }) => {
+    const icons = {
+        google: <svg className={className} viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.345,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>,
+        spinner: <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>,
+        warning: <svg className={className} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>,
+        trash: <svg className={className} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd"></path></svg>,
+        externalLink: <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>,
+        upload: <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>,
+        userShield: <svg className={className} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zm0 16a3 3 0 110-6 3 3 0 010 6z"></path><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path d="M10 2C6.686 2 4 4.686 4 8v2a1 1 0 00-1 1v5a1 1 0 001 1h12a1 1 0 001-1v-5a1 1 0 00-1-1V8c0-3.314-2.686-6-6-6zm-5 8h10v4H5v-4z"></path></svg>,
+    };
+    return icons[name] || null;
+};
+
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// --- KOMPONEN PEMBANTU ---
+const Notification = ({ message, type, onDismiss }) => {
+    if (!message) return null;
+    const colors = {
+        error: 'bg-red-500/20 border-red-500 text-red-300',
+        success: 'bg-green-500/20 border-green-500 text-green-300',
+    };
+    return (
+        <div className={`p-4 rounded-lg border text-sm ${colors[type]} flex justify-between items-center my-4 animate-fadeIn`}>
+            <div dangerouslySetInnerHTML={{ __html: message }} />
+            <button onClick={onDismiss} className="ml-4 text-xl">&times;</button>
+        </div>
+    );
+};
+
+const DeleteModal = ({ isOpen, onClose, onConfirm, projectName, isLoading }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6 text-center animate-fadeIn">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-900/50 mb-4">
+                    <Icon name="warning" className="text-red-500 text-xl w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-medium text-white">Hapus Proyek</h3>
+                <p className="mt-2 text-sm text-gray-400">
+                    Yakin ingin menghapus <strong className="font-bold text-red-400">{projectName}</strong>? Tindakan ini permanen.
+                </p>
+                <div className="mt-6 flex justify-center space-x-4">
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition">Batal</button>
+                    <button onClick={onConfirm} disabled={isLoading} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition disabled:bg-red-800 disabled:cursor-not-allowed flex items-center">
+                        {isLoading ? <Icon name="spinner" className="w-5 h-5 mr-2" /> : 'Ya, Hapus'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- LAYAR OTENTIKASI ---
+const AuthScreen = () => {
+    const [isLoginMode, setIsLoginMode] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [notification, setNotification] = useState({ message: null, type: 'error' });
+
+    const showNotification = (message, type = 'error') => setNotification({ message, type });
+
+    const handleGoogleLogin = async () => {
+        showNotification(null);
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            showNotification(getFirebaseErrorMessage(error));
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        showNotification(null);
+
+        if (email.toLowerCase() === SUPER_USER_EMAIL && password === SUPER_USER_PASS) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password)
+                    .catch(async (error) => {
+                        if (['auth/user-not-found', 'auth/invalid-credential'].includes(error.code)) {
+                            await createUserWithEmailAndPassword(auth, email, password);
+                        } else { throw error; }
+                    });
+            } catch (error) {
+                showNotification(getFirebaseErrorMessage(error));
+            } finally {
+                setIsLoading(false);
+            }
+            return;
+        }
+
+        try {
+            if (isLoginMode) {
+                await signInWithEmailAndPassword(auth, email, password);
+            } else {
+                await createUserWithEmailAndPassword(auth, email, password);
+            }
+        } catch (error) {
+            showNotification(getFirebaseErrorMessage(error));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 space-y-5 animate-fadeIn">
+            <div className="text-center">
+                <h1 className="text-2xl md:text-3xl font-bold text-cyan-400">{isLoginMode ? 'Login Akun Anda' : 'Buat Akun Baru'}</h1>
+                <p className="text-gray-400 mt-2">Kelola semua proyek Vercel Anda di satu tempat.</p>
+            </div>
+            
+            <Notification {...notification} onDismiss={() => setNotification({ message: null })}/>
+
+            <button onClick={handleGoogleLogin} className="w-full bg-white hover:bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center transform hover:scale-105">
+                <Icon name="google" className="w-5 h-5 mr-3"/> Lanjutkan dengan Google
+            </button>
+            
+            <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-gray-600"></div><span className="flex-shrink mx-4 text-gray-400 text-sm">ATAU</span><div className="flex-grow border-t border-gray-600"></div></div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500" placeholder="nama@email.com" />
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500" placeholder="••••••••" />
+                <button type="submit" disabled={isLoading} className="w-full bg-cyan-500 hover:bg-cyan-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition transform hover:scale-105 disabled:bg-cyan-800 disabled:cursor-not-allowed flex items-center justify-center">
+                    {isLoading ? <Icon name="spinner" className="w-5 h-5" /> : (isLoginMode ? 'Login' : 'Daftar')}
+                </button>
+            </form>
+
+            <p className="text-center text-sm text-gray-400">
+                {isLoginMode ? 'Belum punya akun? ' : 'Sudah punya akun? '}
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsLoginMode(!isLoginMode); }} className="font-medium text-cyan-400 hover:underline">
+                    {isLoginMode ? 'Daftar di sini' : 'Login di sini'}
+                </a>
+            </p>
+        </div>
+    );
+};
+
+// --- LAYAR APLIKASI UTAMA ---
+const AppScreen = ({ user, isSuperUser }) => {
+    const [projects, setProjects] = useState([]);
+    const [selectedProject, setSelectedProject] = useState('');
+    const [newProjectName, setNewProjectName] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [deploymentInfo, setDeploymentInfo] = useState(null);
+    const [isLoading, setIsLoading] = useState({ projects: true, deploy: false, delete: false, domain: false });
+    const [notification, setNotification] = useState({ message: null, type: 'error' });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const isNewProject = useMemo(() => selectedProject === '__NEW__', [selectedProject]);
+    const showNotification = (message, type = 'error') => setNotification({ message, type });
+    const setLoading = (key, value) => setIsLoading(prev => ({ ...prev, [key]: value }));
+
+    const fetchVercelAPI = async (endpoint, options = {}) => {
+        const response = await fetch(`${VERCEL_API_BASE}${endpoint}`, {
+            ...options,
+            headers: {
+                'Authorization': `Bearer ${VERCEL_TOKEN}`,
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+        // Perbaikan: Handle respons 204 (No Content) untuk operasi DELETE
+        if (response.status === 204) return { success: true };
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || 'Terjadi kesalahan pada Vercel API.');
+        return data;
+    };
+
+    const fetchProjects = async () => {
+        setLoading('projects', true);
+        try {
+            const data = await fetchVercelAPI('/v9/projects');
+            setProjects(data.projects.sort((a, b) => a.name.localeCompare(b.name)));
+        } catch (error) {
+            showNotification(error.message);
+        } finally {
+            setLoading('projects', false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    useEffect(() => {
+        const fetchDeploymentInfo = async () => {
+            if (selectedProject && !isNewProject) {
+                setLoading('domain', true);
+                setDeploymentInfo(null);
+                try {
+                    const data = await fetchVercelAPI(`/v6/deployments?projectId=${selectedProject}&limit=1&state=READY`);
+                    setDeploymentInfo(data.deployments?.[0]?.url ? `https://${data.deployments[0].url}` : 'Tidak ditemukan');
+                } catch (error) {
+                    setDeploymentInfo('gagal-muat');
+                } finally {
+                    setLoading('domain', false);
+                }
+            } else {
+                setDeploymentInfo(null);
+            }
+        };
+        fetchDeploymentInfo();
+    }, [selectedProject]);
+    
+    const handleDeploy = async () => {
+        showNotification(null);
+        const projectName = isNewProject ? newProjectName.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-') : selectedProject;
+        if (!projectName || !selectedFile) {
+            showNotification('Nama proyek dan file HTML harus diisi.');
+            return;
+        }
+        
+        setLoading('deploy', true);
+        try {
+            const fileContent = await selectedFile.text();
+            const result = await fetchVercelAPI('/v13/deployments?forceNew=true', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: projectName,
+                    files: [{ file: selectedFile.name, data: fileContent }],
+                    projectSettings: { framework: null }
+                })
+            });
+            const finalUrl = `https://${result.alias[0] || result.url}`;
+            showNotification(`<strong>Deploy Berhasil!</strong><br>Proyek tayang di: <a href="${finalUrl}" target="_blank" class="underline font-bold">${finalUrl}</a>`, 'success');
+            await fetchProjects();
+            setSelectedProject(projectName);
+            setNewProjectName('');
+        } catch (error) {
+            showNotification(`Deployment Gagal: ${error.message}`);
+        } finally {
+            setLoading('deploy', false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setLoading('delete', true);
+        showNotification(null);
+        try {
+            await fetchVercelAPI(`/v9/projects/${selectedProject}`, { method: 'DELETE' });
+            showNotification(`Proyek "${selectedProject}" berhasil dihapus.`, 'success');
+            await fetchProjects();
+            setSelectedProject('');
+        } catch (error) {
+            showNotification(`Gagal menghapus proyek: ${error.message}`);
+        } finally {
+            setLoading('delete', false);
+            setIsModalOpen(false);
+        }
+    };
+
+    return (
+        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 space-y-6 animate-fadeIn">
+            <div className="flex justify-between items-center border-b border-gray-700 pb-4">
+                <div>
+                    <h1 className="text-xl font-bold text-cyan-400">Project Manager</h1>
+                    <p className="text-sm text-gray-400 flex items-center">{user.email} {isSuperUser && <Icon name="userShield" title="Super User" className="ml-2 text-cyan-400 w-4 h-4"/>}</p>
+                </div>
+                <button onClick={() => signOut(auth)} className="text-sm text-gray-400 hover:text-white transition">Logout</button>
+            </div>
+            
+            <Notification {...notification} onDismiss={() => setNotification({ message: null })}/>
+
+            <div className="space-y-4">
+                <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} disabled={isLoading.projects} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-500 appearance-none">
+                    <option value="" disabled>{isLoading.projects ? 'Memuat proyek...' : 'Pilih Proyek...'}</option>
+                    <option value="__NEW__">Buat Proyek Baru...</option>
+                    {projects.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                </select>
+
+                { (isLoading.domain || deploymentInfo) && (
+                    <div className="text-sm bg-gray-700/50 p-3 rounded-lg flex items-center space-x-2">
+                        <strong>Domain Aktif:</strong>
+                        {isLoading.domain ? <Icon name="spinner" className="w-4 h-4"/> :
+                         deploymentInfo === 'gagal-muat' ? <span className="text-red-400">Gagal memuat.</span> :
+                         deploymentInfo === 'Tidak ditemukan' ? <span className="text-gray-400">Belum ada.</span> :
+                         <a href={deploymentInfo} target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 hover:text-cyan-300 flex items-center">{deploymentInfo} <Icon name="externalLink" className="ml-2 w-4 h-4"/></a>
+                        }
+                    </div>
+                )}
+                
+                {isNewProject && (<input type="text" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 animate-fadeIn" placeholder="nama-proyek-keren" />)}
+
+                <label className="w-full flex flex-col items-center justify-center p-4 bg-gray-700/50 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+                    <Icon name="upload" className="text-3xl text-gray-500 mb-2"/>
+                    <span className="text-gray-400 text-center">{selectedFile ? selectedFile.name : 'Klik untuk memilih file HTML'}</span>
+                    <input type="file" onChange={e => setSelectedFile(e.target.files[0])} className="hidden" accept=".html"/>
+                </label>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
+                <button onClick={handleDeploy} disabled={isLoading.deploy} className="w-full bg-cyan-500 hover:bg-cyan-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition transform hover:scale-105 disabled:bg-cyan-800 disabled:cursor-not-allowed flex items-center justify-center">
+                    {isLoading.deploy && <Icon name="spinner" className="w-5 h-5 mr-2"/>} {isNewProject ? 'Deploy Baru' : 'Ganti & Deploy Ulang'}
+                </button>
+                {isSuperUser && selectedProject && !isNewProject && (<button onClick={() => setIsModalOpen(true)} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-105 flex items-center justify-center"><Icon name="trash" className="w-5 h-5 mr-2"/> Hapus Proyek</button>)}
+            </div>
+            
+            <DeleteModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={handleDelete} projectName={selectedProject} isLoading={isLoading.delete} />
+        </div>
+    );
+};
+
+// --- KOMPONEN UTAMA ---
+const App = () => {
+    const [user, setUser] = useState(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setIsAuthLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    if (isAuthLoading) {
+        return <div className="flex justify-center items-center h-screen"><Icon name="spinner" className="text-cyan-400 w-10 h-10"/></div>;
+    }
+    
+    return <div className="w-full max-w-lg">{user ? <AppScreen user={user} isSuperUser={user.email === SUPER_USER_EMAIL} /> : <AuthScreen />}</div>;
+};
+
+// Helper untuk pesan error Firebase
+function getFirebaseErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/invalid-email': return 'Format email tidak valid.';
+        case 'auth/user-not-found': case 'auth/wrong-password': case 'auth/invalid-credential': return 'Email atau password salah.';
+        case 'auth/email-already-in-use': return 'Email ini sudah terdaftar.';
+        case 'auth/weak-password': return 'Password terlalu lemah (minimal 6 karakter).';
+        default: return 'Terjadi kesalahan autentikasi. Coba lagi.';
+    }
+}
+
+export default App;
+
